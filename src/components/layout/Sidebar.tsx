@@ -1,0 +1,85 @@
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { Home, Package, TrendingUp, Settings } from 'lucide-react';
+import { useMissionStore } from '../../store/useMissionStore';
+import { useFinanceStore } from '../../store/useFinanceStore';
+import { fmtShort } from '../../utils/parseAmount';
+
+export const Sidebar: React.FC = () => {
+  const missions = useMissionStore((s) => s.missions);
+  const completedIds = useMissionStore((s) => s.completedIds);
+  const wallet = useFinanceStore((s) => s.wallet);
+
+  const activeMissions = missions.filter((m) => !completedIds.includes(m.id));
+  const totalScu = missions.reduce(
+    (acc, m) => acc + m.cargos.reduce((a, c) => a + c.scu, 0),
+    0
+  );
+
+  return (
+    <aside className="sidebar">
+      <div className="sidebar-logo">
+        <div className="logo-top">UEE Cargo Authority</div>
+        <div className="logo-main">
+          SC<span>HT</span>
+        </div>
+        <div className="logo-sub">Hauling Tracker v3.0</div>
+      </div>
+
+      <nav className="nav-section">
+        <div className="nav-label">Navigation</div>
+
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+        >
+          <Home className="nav-icon" size={18} />
+          Home
+        </NavLink>
+
+        <NavLink
+          to="/missions"
+          className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+        >
+          <Package className="nav-icon" size={18} />
+          Missions
+          {activeMissions.length > 0 && (
+            <span className="nav-badge">{activeMissions.length}</span>
+          )}
+        </NavLink>
+
+        <NavLink
+          to="/finance"
+          className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+        >
+          <TrendingUp className="nav-icon" size={18} />
+          Finance
+        </NavLink>
+
+        <div className="nav-label" style={{ marginTop: 16 }}>Système</div>
+
+        <NavLink
+          to="/settings"
+          className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+        >
+          <Settings className="nav-icon" size={18} />
+          Réglages
+        </NavLink>
+      </nav>
+
+      <div className="sidebar-status">
+        <div className="status-row">
+          <div className="status-dot" />
+          SYSTEM ONLINE
+        </div>
+        <div style={{ marginTop: '6px', color: 'var(--amber)', fontSize: '11px' }}>
+          WALLET : {fmtShort(wallet)} aUEC
+        </div>
+        <div style={{ marginTop: '3px', fontSize: '10px' }}>
+          {totalScu} SCU EN TRANSIT
+        </div>
+      </div>
+    </aside>
+  );
+};
