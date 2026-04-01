@@ -1,7 +1,49 @@
-import React, { useState } from 'react';
-import { X, Plus, ChevronRight, Download } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Plus, ChevronRight, Download, Upload, FileDown } from 'lucide-react';
 import { useListsStore } from '../store/useListsStore';
 import { STANTON_LOCATIONS } from '../data/stantonLocations';
+
+const STORE_KEYS = ['scht-missions', 'scht-finance', 'scht-lists'] as const;
+
+function exportData() {
+  const snapshot: Record<string, unknown> = { _version: 1, _exportedAt: new Date().toISOString() };
+  STORE_KEYS.forEach((key) => {
+    const raw = localStorage.getItem(key);
+    snapshot[key] = raw ? JSON.parse(raw) : null;
+  });
+  const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `scht-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(file: File, onDone: (ok: boolean, msg: string) => void) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target?.result as string);
+      let imported = 0;
+      STORE_KEYS.forEach((key) => {
+        if (data[key] !== undefined && data[key] !== null) {
+          localStorage.setItem(key, JSON.stringify(data[key]));
+          imported++;
+        }
+      });
+      if (imported === 0) {
+        onDone(false, 'Fichier invalide — aucune donnée reconnue.');
+        return;
+      }
+      onDone(true, `Import réussi (${imported} store(s)). Rechargement…`);
+      setTimeout(() => window.location.reload(), 1200);
+    } catch {
+      onDone(false, 'Fichier JSON invalide.');
+    }
+  };
+  reader.readAsText(file);
+}
 
 const SYSTEMS = ['Stanton', 'Pyro', 'Nyx'];
 
@@ -33,6 +75,16 @@ export const Settings: React.FC = () => {
   // Collapsed state per system
   const [collapsedSystems, setCollapsedSystems] = useState<Record<string, boolean>>({});
   const [collapsedPlanets, setCollapsedPlanets] = useState<Record<string, boolean>>({});
+
+  const [importStatus, setImportStatus] = useState<{ ok: boolean; msg: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    importData(file, (ok, msg) => setImportStatus({ ok, msg }));
+    e.target.value = '';
+  };
 
   const toggleSystem = (sys: string) =>
     setCollapsedSystems((s) => ({ ...s, [sys]: !s[sys] }));
@@ -222,6 +274,49 @@ export const Settings: React.FC = () => {
               <Plus size={12} style={{ marginRight: 4 }} />
               Ajouter
             </button>
+          </div>
+        </div>
+
+        {/* EXPORT / IMPORT */}
+        <div className="settings-section">
+          <div className="settings-section-title">// Sauvegarde des données</div>
+          <div className="backup-row">
+            <div className="backup-card">
+              <div className="backup-card-title">Exporter</div>
+              <div className="backup-card-desc">
+                Télécharge un fichier JSON contenant toutes tes missions, transactions et listes.
+              </div>
+              <button className="backup-btn export-btn" onClick={exportData}>
+                <FileDown size={13} style={{ marginRight: 7 }} />
+                Exporter les données
+              </button>
+            </div>
+
+            <div className="backup-card">
+              <div className="backup-card-title">Importer</div>
+              <div className="backup-card-desc">
+                Restaure un fichier exporté. Les données actuelles seront remplacées.
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json,application/json"
+                style={{ display: 'none' }}
+                onChange={handleFileChange}
+              />
+              <button
+                className="backup-btn import-btn"
+                onClick={() => { setImportStatus(null); fileInputRef.current?.click(); }}
+              >
+                <Upload size={13} style={{ marginRight: 7 }} />
+                Importer un fichier
+              </button>
+              {importStatus && (
+                <div className={`backup-status${importStatus.ok ? ' ok' : ' err'}`}>
+                  {importStatus.msg}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
