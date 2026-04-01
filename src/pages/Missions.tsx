@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Copy } from 'lucide-react';
+import type { Mission } from '../types';
 import { useMissionStore } from '../store/useMissionStore';
 import { useListsStore } from '../store/useListsStore';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -42,6 +43,19 @@ export const Missions: React.FC = () => {
     setPay('');
     setCargoLines([{ id: cargoIdRef.current, res: '', scu: '', dest: '', planet: '' }]);
     setFormOpen(true);
+  };
+
+  const copyMission = (m: Mission) => {
+    const lines = m.cargos.map((c) => {
+      cargoIdRef.current += 1;
+      return { id: cargoIdRef.current, res: c.res, scu: String(c.scu), dest: c.dest, planet: c.planet };
+    });
+    setOrigin(m.origin);
+    setSystem(m.system);
+    setPay(m.pay > 0 ? String(m.pay) : '');
+    setCargoLines(lines);
+    setFormOpen(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const addCargoLine = () => {
@@ -282,6 +296,14 @@ export const Missions: React.FC = () => {
                       </div>
                     </div>
                     <StatusBadge variant={allDone ? 'done' : 'active'} />
+                    <button
+                      className="replay-btn"
+                      onClick={() => copyMission(m)}
+                      title="Copier cette mission"
+                    >
+                      <Copy size={12} style={{ marginRight: 5 }} />
+                      Copier
+                    </button>
                     <button
                       className="mission-del"
                       onClick={() => deleteMission(m.id)}
