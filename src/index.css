@@ -130,6 +130,21 @@ body::before{
 .res-check:hover{border-color:var(--green);background:var(--green-dim);}
 .res-check.checked{background:var(--green-dim);border-color:var(--green);color:var(--green);}
 
+/* HISTORY */
+.history-card{border-color:rgba(0,255,176,0.15);}
+.history-date{color:var(--text-low);margin-left:4px;}
+.replay-btn{display:flex;align-items:center;padding:4px 12px;font-size:10px;font-family:var(--font-mono);border:1px solid rgba(0,255,176,0.3);background:var(--green-dim);cursor:pointer;color:var(--green);letter-spacing:0.1em;text-transform:uppercase;transition:all 0.15s;white-space:nowrap;}
+.replay-btn:hover{background:rgba(0,255,176,0.25);border-color:var(--green);}
+.replay-panel{padding:14px 16px;border-top:1px solid var(--border);background:rgba(0,255,176,0.02);}
+.replay-panel-title{font-size:10px;letter-spacing:0.25em;color:var(--green);text-transform:uppercase;font-family:var(--font-mono);margin-bottom:12px;}
+.replay-lines{display:flex;flex-direction:column;gap:8px;margin-bottom:8px;}
+.replay-line{display:flex;align-items:center;gap:8px;}
+.replay-input{background:var(--bg);border:1px solid var(--border);color:var(--text-hi);padding:6px 9px;font-size:13px;font-family:var(--font-mono);outline:none;transition:border-color 0.15s;}
+.replay-input:focus{border-color:var(--border-mid);}
+.replay-scu{width:72px;flex:0 0 72px;}
+.replay-pay-row{display:flex;align-items:center;gap:12px;margin-top:10px;}
+.replay-pay-label{font-size:10px;letter-spacing:0.15em;color:var(--text-low);text-transform:uppercase;font-family:var(--font-mono);white-space:nowrap;}
+
 /* MISSIONS */
 .mission-add-btn{display:flex;align-items:center;gap:8px;padding:9px 20px;font-size:12px;font-family:var(--font-mono);border:1px solid var(--border-mid);background:var(--accent-dim);cursor:pointer;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;transition:all 0.2s;margin-bottom:20px;clip-path:polygon(12px 0%,100% 0%,100% calc(100% - 10px),calc(100% - 10px) 100%,0% 100%,0% 0%);}
 .mission-add-btn:hover{background:rgba(0,180,255,0.28);border-color:var(--accent);}

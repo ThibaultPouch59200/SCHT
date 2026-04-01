@@ -244,15 +244,15 @@ export const Missions: React.FC = () => {
         </div>
 
         <div className="missions-list">
-          {missions.length === 0 ? (
+          {missions.filter((m) => !completedIds.includes(m.id)).length === 0 ? (
             <div className="empty-state">
-              // NO MISSIONS RECORDED
+              // NO ACTIVE MISSIONS
               <br />
-              Crée ta première mission de hauling.
+              Crée une nouvelle mission ou consulte l'historique.
             </div>
           ) : (
-            missions.map((m) => {
-              const allDone = completedIds.includes(m.id);
+            missions.filter((m) => !completedIds.includes(m.id)).map((m) => {
+              const allDone = false;
               const totalScu = m.cargos.reduce((a, c) => a + c.scu, 0);
               const uniqueDests = [...new Set(m.cargos.map((c) => c.dest))];
 

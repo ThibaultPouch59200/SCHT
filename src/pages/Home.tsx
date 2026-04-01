@@ -50,10 +50,12 @@ const SYSTEMS = ['Tous', 'Stanton', 'Pyro', 'Nyx'];
 
 export const Home: React.FC = () => {
   const missions = useMissionStore((s) => s.missions);
+  const completedIds = useMissionStore((s) => s.completedIds);
   const sysFilter = useMissionStore((s) => s.sysFilter);
   const setSysFilter = useMissionStore((s) => s.setSysFilter);
 
-  const stationsMap = buildStationsMap(missions, sysFilter);
+  const activeMissions = missions.filter((m) => !completedIds.includes(m.id));
+  const stationsMap = buildStationsMap(activeMissions, sysFilter);
   const planetGroups = groupByPlanet(stationsMap);
   const entries = Object.entries(planetGroups);
 

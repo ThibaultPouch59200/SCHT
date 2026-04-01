@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Package, TrendingUp, Settings } from 'lucide-react';
+import { Home, Package, Clock, TrendingUp, Settings } from 'lucide-react';
 import { useMissionStore } from '../../store/useMissionStore';
 import { useFinanceStore } from '../../store/useFinanceStore';
 import { fmtShort } from '../../utils/parseAmount';
@@ -11,6 +11,7 @@ export const Sidebar: React.FC = () => {
   const wallet = useFinanceStore((s) => s.wallet);
 
   const activeMissions = missions.filter((m) => !completedIds.includes(m.id));
+  const completedMissions = missions.filter((m) => completedIds.includes(m.id));
   const totalScu = missions.reduce(
     (acc, m) => acc + m.cargos.reduce((a, c) => a + c.scu, 0),
     0
@@ -46,6 +47,19 @@ export const Sidebar: React.FC = () => {
           Missions
           {activeMissions.length > 0 && (
             <span className="nav-badge">{activeMissions.length}</span>
+          )}
+        </NavLink>
+
+        <NavLink
+          to="/history"
+          className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+        >
+          <Clock className="nav-icon" size={18} />
+          Historique
+          {completedMissions.length > 0 && (
+            <span className="nav-badge" style={{ borderColor: 'rgba(0,255,176,0.3)', color: 'var(--green)', background: 'var(--green-dim)' }}>
+              {completedMissions.length}
+            </span>
           )}
         </NavLink>
 

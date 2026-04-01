@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Mission } from '../types';
+import type { Mission, CargoLine } from '../types';
 import { useFinanceStore } from './useFinanceStore';
 
 interface PersistedState {
@@ -16,6 +16,7 @@ interface MissionStore extends PersistedState {
   deleteMission: (id: number) => void;
   setDeliveredAmount: (stationKey: string, res: string, amount: number) => void;
   confirmStation: (stationKey: string, resources: Record<string, number>) => void;
+  replayMission: (templateId: number, newCargos: CargoLine[]) => void;
   setSysFilter: (sys: string) => void;
   markCompleted: (id: number) => void;
   isCompleted: (id: number) => boolean;
@@ -105,6 +106,43 @@ export const useMissionStore = create<MissionStore>()(
             newDelivered
           );
           return { delivered: newDelivered, completedIds: newCompletedIds };
+        });
+      },
+
+      // Creates a fresh run based on a completed mission.
+      // Subtracts the original delivered amounts so the new mission starts at 0.
+      replayMission: (templateId: number, newCargos: CargoLine[]) => {
+        const state = get();
+        const original = state.missions.find((m) => m.id === templateId);
+        if (!original) return;
+
+        // Subtract original delivered amounts so the replayed mission starts fresh
+        const newDelivered = { ...state.delivered };
+        original.cargos.forEach((c) => {
+          const key = `${original.system}|${c.planet}|${c.dest}|${c.res}`;
+          newDelivered[key] = Math.max(0, coerceDelivered(newDelivered[key], c.scu) - c.scu);
+        });
+
+        const newMission: Mission = {
+          origin: original.origin,
+          system: original.system,
+          pay: original.pay,
+          cargos: newCargos,
+          id: state.nextId,
+          createdAt: new Date().toISOString(),
+        };
+
+        const newCompletedIds = checkAndCompleteAll(
+          [...state.missions, newMission],
+          state.completedIds,
+          newDelivered
+        );
+
+        set({
+          missions: [...state.missions, newMission],
+          nextId: state.nextId + 1,
+          delivered: newDelivered,
+          completedIds: newCompletedIds,
         });
       },
 
