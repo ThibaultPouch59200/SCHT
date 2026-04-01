@@ -9,23 +9,31 @@ interface StationBlockProps {
   resources: Record<string, number>;
 }
 
+// Backward compat: old persisted data may have boolean values
+function resolveDelivered(val: unknown, scu: number): number {
+  if (val === true) return scu;
+  if (!val) return 0;
+  return val as number;
+}
+
 export const StationBlock: React.FC<StationBlockProps> = ({
   stationKey,
   name,
   resources,
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const delivered = useMissionStore((s) => s.delivered);
-  const toggleResource = useMissionStore((s) => s.toggleResource);
+  const setDeliveredAmount = useMissionStore((s) => s.setDeliveredAmount);
   const confirmStation = useMissionStore((s) => s.confirmStation);
 
   const totalScu = Object.values(resources).reduce((a, v) => a + v, 0);
-  const delivScu = Object.entries(resources).reduce(
-    (a, [res, scu]) => a + (delivered[`${stationKey}|${res}`] ? scu : 0),
-    0
-  );
-  const allDone = Object.keys(resources).every(
-    (res) => !!delivered[`${stationKey}|${res}`]
+  const delivScu = Object.entries(resources).reduce((a, [res, scu]) => {
+    const amount = resolveDelivered(delivered[`${stationKey}|${res}`], scu);
+    return a + Math.min(amount, scu);
+  }, 0);
+  const allDone = Object.entries(resources).every(
+    ([res, scu]) => resolveDelivered(delivered[`${stationKey}|${res}`], scu) >= scu
   );
 
   const handleConfirm = () => {
@@ -67,18 +75,30 @@ export const StationBlock: React.FC<StationBlockProps> = ({
               Tout confirmer
             </div>
           )}
+          <div
+            className="station-collapse-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              setCollapsed((c) => !c);
+            }}
+            title={collapsed ? 'Expand' : 'Collapse'}
+          >
+            {collapsed ? '▶' : '▼'}
+          </div>
         </div>
-        <div className="station-resources">
-          {Object.entries(resources).map(([res, scu]) => (
-            <ResourceRow
-              key={res}
-              res={res}
-              scu={scu}
-              delivered={!!delivered[`${stationKey}|${res}`]}
-              onToggle={() => toggleResource(stationKey, res)}
-            />
-          ))}
-        </div>
+        {!collapsed && (
+          <div className="station-resources">
+            {Object.entries(resources).map(([res, scu]) => (
+              <ResourceRow
+                key={res}
+                res={res}
+                scu={scu}
+                deliveredAmount={resolveDelivered(delivered[`${stationKey}|${res}`], scu)}
+                onSetAmount={(amount) => setDeliveredAmount(stationKey, res, amount)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <Modal

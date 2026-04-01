@@ -5,7 +5,7 @@ import { useFinanceStore } from './useFinanceStore';
 
 interface PersistedState {
   missions: Mission[];
-  delivered: Record<string, boolean>;
+  delivered: Record<string, number>;
   completedIds: number[];
   nextId: number;
   sysFilter: string;
@@ -14,24 +14,32 @@ interface PersistedState {
 interface MissionStore extends PersistedState {
   addMission: (m: Omit<Mission, 'id' | 'createdAt'>) => Mission;
   deleteMission: (id: number) => void;
-  toggleResource: (stationKey: string, res: string) => void;
+  setDeliveredAmount: (stationKey: string, res: string, amount: number) => void;
   confirmStation: (stationKey: string, resources: Record<string, number>) => void;
   setSysFilter: (sys: string) => void;
   markCompleted: (id: number) => void;
   isCompleted: (id: number) => boolean;
 }
 
+// Backward compat: old persisted data may have boolean values
+function coerceDelivered(val: unknown, scu: number): number {
+  if (val === true) return scu;
+  if (!val) return 0;
+  return val as number;
+}
+
 function checkAndCompleteAll(
   missions: Mission[],
   completedIds: number[],
-  delivered: Record<string, boolean>
+  delivered: Record<string, number>
 ): number[] {
   const newCompletedIds = [...completedIds];
   missions.forEach((m) => {
     if (newCompletedIds.includes(m.id)) return;
     const done = m.cargos.every((c) => {
       const stationKey = `${m.system}|${c.planet}|${c.dest}`;
-      return !!delivered[`${stationKey}|${c.res}`];
+      const key = `${stationKey}|${c.res}`;
+      return coerceDelivered(delivered[key], c.scu) >= c.scu;
     });
     if (done) {
       newCompletedIds.push(m.id);
@@ -72,13 +80,10 @@ export const useMissionStore = create<MissionStore>()(
         }));
       },
 
-      toggleResource: (stationKey: string, res: string) => {
+      setDeliveredAmount: (stationKey: string, res: string, amount: number) => {
         const delivKey = `${stationKey}|${res}`;
         set((state) => {
-          const newDelivered = {
-            ...state.delivered,
-            [delivKey]: !state.delivered[delivKey],
-          };
+          const newDelivered = { ...state.delivered, [delivKey]: amount };
           const newCompletedIds = checkAndCompleteAll(
             state.missions,
             state.completedIds,
@@ -91,8 +96,8 @@ export const useMissionStore = create<MissionStore>()(
       confirmStation: (stationKey: string, resources: Record<string, number>) => {
         set((state) => {
           const newDelivered = { ...state.delivered };
-          Object.keys(resources).forEach((res) => {
-            newDelivered[`${stationKey}|${res}`] = true;
+          Object.entries(resources).forEach(([res, scu]) => {
+            newDelivered[`${stationKey}|${res}`] = scu;
           });
           const newCompletedIds = checkAndCompleteAll(
             state.missions,
@@ -120,6 +125,6 @@ export const useMissionStore = create<MissionStore>()(
     }),
     {
       name: 'scht-missions',
-      }
+    }
   )
 );

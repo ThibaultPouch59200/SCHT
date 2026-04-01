@@ -3,29 +3,44 @@ import React from 'react';
 interface ResourceRowProps {
   res: string;
   scu: number;
-  delivered: boolean;
-  onToggle: () => void;
+  deliveredAmount: number;
+  onSetAmount: (amount: number) => void;
 }
 
 export const ResourceRow: React.FC<ResourceRowProps> = ({
   res,
   scu,
-  delivered,
-  onToggle,
+  deliveredAmount,
+  onSetAmount,
 }) => {
+  const isFull = deliveredAmount >= scu;
+  const isPartial = deliveredAmount > 0 && deliveredAmount < scu;
+
   return (
-    <div className={`resource-row${delivered ? ' delivered' : ''}`}>
+    <div className={`resource-row${isFull ? ' delivered' : isPartial ? ' partial' : ''}`}>
       <div className="res-name">{res}</div>
-      <div className="res-scu">{scu}</div>
-      <div className="res-unit">SCU</div>
+      <input
+        className="res-scu-input"
+        type="number"
+        min={0}
+        max={scu}
+        value={deliveredAmount === 0 ? '' : deliveredAmount}
+        placeholder="0"
+        onClick={(e) => e.stopPropagation()}
+        onChange={(e) => {
+          const val = Math.min(scu, Math.max(0, Number(e.target.value) || 0));
+          onSetAmount(val);
+        }}
+      />
+      <div className="res-unit">/ {scu} SCU</div>
       <div
-        className={`res-check${delivered ? ' checked' : ''}`}
+        className={`res-check${isFull ? ' checked' : ''}`}
         onClick={(e) => {
           e.stopPropagation();
-          onToggle();
+          onSetAmount(isFull ? 0 : scu);
         }}
       >
-        {delivered ? '✓' : ''}
+        {isFull ? '✓' : ''}
       </div>
     </div>
   );
