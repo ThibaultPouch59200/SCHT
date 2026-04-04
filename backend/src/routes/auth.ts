@@ -49,9 +49,55 @@ router.post('/login', async (req: Request, res: Response) => {
 
 // GET /api/auth/me
 router.get('/me', authenticate, async (req: AuthRequest, res: Response) => {
-  const user = await prisma.user.findUnique({ where: { id: req.userId } });
+  const user = await prisma.user.findUnique({
+    where: { id: req.userId },
+    include: { selectedShip: true },
+  });
   if (!user) { res.status(404).json({ error: 'User not found' }); return; }
-  res.json({ id: user.id, username: user.username });
+  res.json({
+    id: user.id,
+    username: user.username,
+    selectedShip: user.selectedShip
+      ? { id: user.selectedShip.id, name: user.selectedShip.name, scu: user.selectedShip.scu, manufacturer: user.selectedShip.manufacturer, category: user.selectedShip.category }
+      : null,
+  });
+});
+
+// PUT /api/auth/me/ship — update user's selected ship (auth required)
+router.put('/me/ship', authenticate, async (req: AuthRequest, res: Response) => {
+  const { shipId } = req.body as { shipId?: number | null };
+  if (shipId === undefined) {
+    res.status(400).json({ error: 'shipId required' });
+    return;
+  }
+
+  const resolvedShipId = (shipId === null || shipId === 0) ? null : shipId;
+
+  if (resolvedShipId !== null) {
+    const ship = await prisma.ship.findUnique({ where: { id: resolvedShipId } });
+    if (!ship) {
+      res.status(404).json({ error: 'Ship not found' });
+      return;
+    }
+  }
+
+  const user = await prisma.user.update({
+    where: { id: req.userId },
+    data: { selectedShipId: resolvedShipId },
+    include: { selectedShip: true },
+  });
+
+  res.json({
+    selectedShip: user.selectedShip
+      ? {
+          id: user.selectedShip.id,
+          name: user.selectedShip.name,
+          scu: user.selectedShip.scu,
+          manufacturer: user.selectedShip.manufacturer,
+          category: user.selectedShip.category,
+        }
+      : null,
+  });
 });
 
 export default router;
