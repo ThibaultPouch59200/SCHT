@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  username     String        @unique
+  passwordHash String
+  wallet       Int           @default(0)
+  createdAt    DateTime      @default(now())
+  missions     Mission[]
+  transactions Transaction[]
+}
+
+model Location {
+  id         Int         @id @default(autoincrement())
+  name       String
+  planet     String
+  system     String
+  missions   Mission[]   @relation("MissionOrigin")
+  cargoLines CargoLine[] @relation("CargoLineDest")
+
+  @@unique([name, system])
+}
+
+model Resource {
+  id         Int         @id @default(autoincrement())
+  name       String      @unique
+  cargoLines CargoLine[]
+}
+
+model Mission {
+  id          Int         @id @default(autoincrement())
+  userId      Int
+  originId    Int
+  system      String
+  pay         Int
+  createdAt   DateTime    @default(now())
+  completedAt DateTime?
+  user        User        @relation(fields: [userId], references: [id])
+  origin      Location    @relation("MissionOrigin", fields: [originId], references: [id])
+  cargos      CargoLine[]
+}
+
+model CargoLine {
+  id         Int              @id @default(autoincrement())
+  missionId  Int
+  resourceId Int
+  scu        Float
+  destId     Int
+  mission    Mission          @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  resource   Resource         @relation(fields: [resourceId], references: [id])
+  dest       Location         @relation("CargoLineDest", fields: [destId], references: [id])
+  delivered  DeliveredAmount?
+}
+
+model DeliveredAmount {
+  id          Int       @id @default(autoincrement())
+  cargoLineId Int       @unique
+  amount      Float     @default(0)
+  confirmed   Boolean   @default(false)
+  cargoLine   CargoLine @relation(fields: [cargoLineId], references: [id], onDelete: Cascade)
+}
+
+model Transaction {
+  id        Int    @id @default(autoincrement())
+  userId    Int
+  date      String
+  desc      String
+  amount    Int
+  type      String
+  missionId Int?
+  user      User   @relation(fields: [userId], references: [id])
+}
