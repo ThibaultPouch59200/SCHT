@@ -73,7 +73,7 @@ router.post('/transactions', authenticate, async (req: AuthRequest, res: Respons
 
 // DELETE /api/finance/transactions/:id
 router.delete('/transactions/:id', authenticate, async (req: AuthRequest, res: Response) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(String(req.params['id']));
   const tx = await prisma.transaction.findFirst({ where: { id, userId: req.userId } });
   if (!tx) { res.status(404).json({ error: 'Transaction not found' }); return; }
   await prisma.transaction.delete({ where: { id } });

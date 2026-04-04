@@ -109,7 +109,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
 
 // DELETE /api/missions/:id
 router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(String(req.params['id']));
   const mission = await prisma.mission.findFirst({ where: { id, userId: req.userId } });
   if (!mission) { res.status(404).json({ error: 'Mission not found' }); return; }
   await prisma.mission.delete({ where: { id } });
@@ -118,8 +118,8 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 
 // PATCH /api/missions/:id/cargo/:cargoId/delivered  — update delivered amount
 router.patch('/:id/cargo/:cargoId/delivered', authenticate, async (req: AuthRequest, res: Response) => {
-  const missionId = parseInt(req.params.id);
-  const cargoId = parseInt(req.params.cargoId);
+  const missionId = parseInt(String(req.params['id']));
+  const cargoId = parseInt(String(req.params['cargoId']));
   const { amount } = req.body as { amount: number };
 
   const mission = await prisma.mission.findFirst({ where: { id: missionId, userId: req.userId } });
@@ -148,8 +148,8 @@ router.patch('/:id/cargo/:cargoId/delivered', authenticate, async (req: AuthRequ
 
 // POST /api/missions/:id/stations/:stationName/confirm  — confirm full station delivery
 router.post('/:id/stations/:stationName/confirm', authenticate, async (req: AuthRequest, res: Response) => {
-  const missionId = parseInt(req.params.id);
-  const stationName = decodeURIComponent(req.params.stationName);
+  const missionId = parseInt(String(req.params['id']));
+  const stationName = decodeURIComponent(String(req.params['stationName']));
 
   const mission = await prisma.mission.findFirst({
     where: { id: missionId, userId: req.userId },
@@ -184,7 +184,7 @@ router.post('/:id/stations/:stationName/confirm', authenticate, async (req: Auth
 
 // POST /api/missions/:id/copy  — copy a mission as a new one
 router.post('/:id/copy', authenticate, async (req: AuthRequest, res: Response) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(String(req.params['id']));
   const source = await prisma.mission.findFirst({
     where: { id, userId: req.userId },
     include: MISSION_INCLUDE,
