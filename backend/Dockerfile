@@ -1,10 +1,12 @@
 FROM node:current-alpine AS deps
 WORKDIR /app
+RUN apk add --no-cache openssl
 COPY package.json ./
 RUN npm install
 
 FROM node:current-alpine AS builder
 WORKDIR /app
+RUN apk add --no-cache openssl
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate
@@ -12,6 +14,7 @@ RUN npm run build
 
 FROM node:current-alpine AS runner
 WORKDIR /app
+RUN apk add --no-cache openssl
 ENV NODE_ENV=production
 
 COPY --from=builder /app/dist ./dist
