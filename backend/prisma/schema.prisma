@@ -9,13 +9,24 @@ datasource db {
 }
 
 model User {
-  id           Int           @id @default(autoincrement())
-  username     String        @unique
-  passwordHash String
-  wallet       Int           @default(0)
-  createdAt    DateTime      @default(now())
-  missions     Mission[]
-  transactions Transaction[]
+  id             Int           @id @default(autoincrement())
+  username       String        @unique
+  passwordHash   String
+  wallet         Int           @default(0)
+  createdAt      DateTime      @default(now())
+  missions       Mission[]
+  transactions   Transaction[]
+  selectedShipId Int?
+  selectedShip   Ship?         @relation(fields: [selectedShipId], references: [id])
+}
+
+model Ship {
+  id           Int    @id @default(autoincrement())
+  name         String
+  manufacturer String
+  scu          Int
+  category     String
+  users        User[]
 }
 
 model Location {
