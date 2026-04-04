@@ -1,4 +1,5 @@
 export interface CargoLine {
+  id?: number;  // present when fetched from API
   res: string;
   scu: number;
   dest: string;

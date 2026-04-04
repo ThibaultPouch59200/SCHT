@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
 import { StationBlock } from './StationBlock';
 import { useMissionStore } from '../../store/useMissionStore';
-
-interface StationInfo {
-  key: string;
-  name: string;
-  resources: Record<string, number>;
-}
+import type { StationInfo } from '../../pages/Home';
 
 interface PlanetGroupProps {
   planet: string;
@@ -14,25 +9,17 @@ interface PlanetGroupProps {
   stations: StationInfo[];
 }
 
-export const PlanetGroup: React.FC<PlanetGroupProps> = ({
-  planet,
-  system,
-  stations,
-}) => {
+export const PlanetGroup: React.FC<PlanetGroupProps> = ({ planet, system, stations }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const delivered = useMissionStore((s) => s.delivered);
+  const deliveredById = useMissionStore((s) => s.deliveredById);
 
   const totalScu = stations.reduce(
-    (acc, s) => acc + Object.values(s.resources).reduce((a, v) => a + v, 0),
+    (acc, s) => acc + s.cargos.reduce((a, c) => a + c.scu, 0),
     0
   );
   const delivScu = stations.reduce(
     (acc, s) =>
-      acc +
-      Object.entries(s.resources).reduce(
-        (a, [res, scu]) => a + (delivered[`${s.key}|${res}`] ? scu : 0),
-        0
-      ),
+      acc + s.cargos.reduce((a, c) => a + Math.min(deliveredById[c.id] ?? 0, c.scu), 0),
     0
   );
 
@@ -50,12 +37,7 @@ export const PlanetGroup: React.FC<PlanetGroupProps> = ({
       {!collapsed && (
         <div className="station-list">
           {stations.map((s) => (
-            <StationBlock
-              key={s.key}
-              stationKey={s.key}
-              name={s.name}
-              resources={s.resources}
-            />
+            <StationBlock key={s.key} station={s} />
           ))}
         </div>
       )}

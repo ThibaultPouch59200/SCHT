@@ -2,56 +2,46 @@ import React, { useState } from 'react';
 import { ResourceRow } from './ResourceRow';
 import { Modal } from '../ui/Modal';
 import { useMissionStore } from '../../store/useMissionStore';
+import type { StationInfo } from '../../pages/Home';
 
 interface StationBlockProps {
-  stationKey: string;
-  name: string;
-  resources: Record<string, number>;
+  station: StationInfo;
 }
 
-// Backward compat: old persisted data may have boolean values
-function resolveDelivered(val: unknown, scu: number): number {
-  if (val === true) return scu;
-  if (!val) return 0;
-  return val as number;
-}
-
-export const StationBlock: React.FC<StationBlockProps> = ({
-  stationKey,
-  name,
-  resources,
-}) => {
+export const StationBlock: React.FC<StationBlockProps> = ({ station }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const delivered = useMissionStore((s) => s.delivered);
+  const deliveredById = useMissionStore((s) => s.deliveredById);
   const setDeliveredAmount = useMissionStore((s) => s.setDeliveredAmount);
   const confirmStation = useMissionStore((s) => s.confirmStation);
 
-  const totalScu = Object.values(resources).reduce((a, v) => a + v, 0);
-  const delivScu = Object.entries(resources).reduce((a, [res, scu]) => {
-    const amount = resolveDelivered(delivered[`${stationKey}|${res}`], scu);
-    return a + Math.min(amount, scu);
-  }, 0);
-  const allDone = Object.entries(resources).every(
-    ([res, scu]) => resolveDelivered(delivered[`${stationKey}|${res}`], scu) >= scu
+  const totalScu = station.cargos.reduce((a, c) => a + c.scu, 0);
+  const delivScu = station.cargos.reduce(
+    (a, c) => a + Math.min(deliveredById[c.id] ?? 0, c.scu),
+    0
   );
+  const allDone = station.cargos.every((c) => (deliveredById[c.id] ?? 0) >= c.scu);
 
   const handleConfirm = () => {
-    confirmStation(stationKey, resources);
+    confirmStation(station.missionId, station.name);
     setModalOpen(false);
   };
+
+  // Build resources map for Modal (res -> scu)
+  const resourcesForModal: Record<string, number> = {};
+  station.cargos.forEach((c) => {
+    resourcesForModal[c.res] = (resourcesForModal[c.res] ?? 0) + c.scu;
+  });
 
   return (
     <>
       <div className={`station-block${allDone ? ' all-done' : ''}`}>
         <div
           className="station-header"
-          onClick={() => {
-            if (!allDone) setModalOpen(true);
-          }}
+          onClick={() => { if (!allDone) setModalOpen(true); }}
         >
           <div className="station-title">
-            {name}
+            {station.name}
             {allDone ? ' ✓' : ''}
           </div>
           <div>
@@ -67,20 +57,14 @@ export const StationBlock: React.FC<StationBlockProps> = ({
           ) : (
             <div
               className="confirm-all-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                setModalOpen(true);
-              }}
+              onClick={(e) => { e.stopPropagation(); setModalOpen(true); }}
             >
               Tout confirmer
             </div>
           )}
           <div
             className="station-collapse-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              setCollapsed((c) => !c);
-            }}
+            onClick={(e) => { e.stopPropagation(); setCollapsed((c) => !c); }}
             title={collapsed ? 'Expand' : 'Collapse'}
           >
             {collapsed ? '▶' : '▼'}
@@ -88,13 +72,15 @@ export const StationBlock: React.FC<StationBlockProps> = ({
         </div>
         {!collapsed && (
           <div className="station-resources">
-            {Object.entries(resources).map(([res, scu]) => (
+            {station.cargos.map((c) => (
               <ResourceRow
-                key={res}
-                res={res}
-                scu={scu}
-                deliveredAmount={resolveDelivered(delivered[`${stationKey}|${res}`], scu)}
-                onSetAmount={(amount) => setDeliveredAmount(stationKey, res, amount)}
+                key={c.id}
+                res={c.res}
+                scu={c.scu}
+                deliveredAmount={deliveredById[c.id] ?? 0}
+                onSetAmount={(amount) =>
+                  setDeliveredAmount(station.missionId, c.id, amount)
+                }
               />
             ))}
           </div>
@@ -104,8 +90,8 @@ export const StationBlock: React.FC<StationBlockProps> = ({
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        stationName={name}
-        resources={resources}
+        stationName={station.name}
+        resources={resourcesForModal}
         onConfirm={handleConfirm}
       />
     </>

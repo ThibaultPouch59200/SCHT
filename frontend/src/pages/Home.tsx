@@ -2,48 +2,58 @@ import React from 'react';
 import { useMissionStore } from '../store/useMissionStore';
 import { PlanetGroup } from '../components/home/PlanetGroup';
 
-interface StationInfo {
-  key: string;
-  name: string;
-  resources: Record<string, number>;
+export interface CargoLineInfo {
+  id: number;
+  res: string;
+  scu: number;
 }
 
-interface PlanetGroupData {
+export interface StationInfo {
+  key: string;       // `${missionId}|${stationName}`
+  missionId: number;
+  name: string;
+  cargos: CargoLineInfo[];
+}
+
+export interface PlanetGroupData {
   system: string;
   planet: string;
   stations: StationInfo[];
 }
 
-function buildStationsMap(
+function buildGroups(
   missions: ReturnType<typeof useMissionStore.getState>['missions'],
   sysFilter: string
-): Record<string, { system: string; planet: string; name: string; resources: Record<string, number> }> {
-  const map: Record<string, { system: string; planet: string; name: string; resources: Record<string, number> }> = {};
+): Record<string, PlanetGroupData> {
+  const planets: Record<string, PlanetGroupData> = {};
+
   missions.forEach((m) => {
     if (sysFilter !== 'all' && m.system !== sysFilter) return;
-    m.cargos.forEach((c) => {
-      const key = `${m.system}|${c.planet}|${c.dest}`;
-      if (!map[key]) {
-        map[key] = { system: m.system, planet: c.planet, name: c.dest, resources: {} };
+
+    // Group this mission's cargos by destination station
+    const byStation: Record<string, CargoLineInfo[]> = {};
+    m.cargos.forEach((c: any) => {
+      if (!byStation[c.dest]) byStation[c.dest] = [];
+      byStation[c.dest].push({ id: c.id, res: c.res, scu: c.scu });
+    });
+
+    Object.entries(byStation).forEach(([dest, cargos]) => {
+      // Find planet for this destination
+      const planet = m.cargos.find((c: any) => c.dest === dest)?.planet ?? m.system;
+      const planetKey = `${m.system}|${planet}`;
+      if (!planets[planetKey]) {
+        planets[planetKey] = { system: m.system, planet, stations: [] };
       }
-      map[key].resources[c.res] = (map[key].resources[c.res] ?? 0) + c.scu;
+      planets[planetKey].stations.push({
+        key: `${m.id}|${dest}`,
+        missionId: m.id,
+        name: dest,
+        cargos,
+      });
     });
   });
-  return map;
-}
 
-function groupByPlanet(
-  stationsMap: ReturnType<typeof buildStationsMap>
-): Record<string, PlanetGroupData> {
-  const g: Record<string, PlanetGroupData> = {};
-  Object.entries(stationsMap).forEach(([key, s]) => {
-    const pk = `${s.system}|${s.planet}`;
-    if (!g[pk]) {
-      g[pk] = { system: s.system, planet: s.planet, stations: [] };
-    }
-    g[pk].stations.push({ key, name: s.name, resources: s.resources });
-  });
-  return g;
+  return planets;
 }
 
 const SYSTEMS = ['Tous', 'Stanton', 'Pyro', 'Nyx'];
@@ -55,8 +65,7 @@ export const Home: React.FC = () => {
   const setSysFilter = useMissionStore((s) => s.setSysFilter);
 
   const activeMissions = missions.filter((m) => !completedIds.includes(m.id));
-  const stationsMap = buildStationsMap(activeMissions, sysFilter);
-  const planetGroups = groupByPlanet(stationsMap);
+  const planetGroups = buildGroups(activeMissions, sysFilter);
   const entries = Object.entries(planetGroups);
 
   return (

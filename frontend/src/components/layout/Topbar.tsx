@@ -1,9 +1,10 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, LogOut } from 'lucide-react';
 import { useMissionStore } from '../../store/useMissionStore';
 import { useFinanceStore } from '../../store/useFinanceStore';
 import { useThemeStore } from '../../store/useThemeStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { fmtShort } from '../../utils/parseAmount';
 
 const pageTitles: Record<string, string> = {
@@ -18,6 +19,7 @@ export const Topbar: React.FC = () => {
   const completedIds = useMissionStore((s) => s.completedIds);
   const wallet = useFinanceStore((s) => s.wallet);
   const { theme, toggleTheme } = useThemeStore();
+  const { username, logout } = useAuthStore();
 
   const activeMissions = missions.filter((m) => !completedIds.includes(m.id));
   const totalScu = missions.reduce(
@@ -42,8 +44,12 @@ export const Topbar: React.FC = () => {
       <div className="topbar-stat" style={{ marginLeft: '16px' }}>
         WALLET <strong>{fmtShort(wallet)}</strong>
       </div>
+      <span className="topbar-user">{username}</span>
       <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
         {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+      </button>
+      <button className="theme-toggle" onClick={logout} title="Se déconnecter">
+        <LogOut size={15} />
       </button>
     </div>
   );
