@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { api, SerializedMission } from '../lib/api';
+import { api } from '../lib/api';
+import type { SerializedMission } from '../lib/api';
 import type { Mission, CargoLine } from '../types';
 import { useFinanceStore } from './useFinanceStore';
 

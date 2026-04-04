@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { api, SerializedTransaction } from '../lib/api';
+import { api } from '../lib/api';
+import type { SerializedTransaction } from '../lib/api';
 import type { Transaction } from '../types';
 
 function toTransaction(t: SerializedTransaction): Transaction {
