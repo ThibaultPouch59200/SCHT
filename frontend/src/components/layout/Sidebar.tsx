@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Package, Clock, TrendingUp, Settings } from 'lucide-react';
+import { LayoutDashboard, Home, Package, Clock, TrendingUp, Settings, CircleHelp } from 'lucide-react';
 import { useMissionStore } from '../../store/useMissionStore';
 import { useFinanceStore } from '../../store/useFinanceStore';
 import { fmtShort } from '../../utils/parseAmount';
@@ -20,11 +20,11 @@ export const Sidebar: React.FC = () => {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
-        <div className="logo-top">UEE Cargo Authority</div>
+        <div className="logo-top">Hauling Tracker</div>
         <div className="logo-main">
           SC<span>HT</span>
         </div>
-        <div className="logo-sub">Hauling Tracker v3.0</div>
+        <div className="logo-sub">Hauling Tracker v3.2</div>
       </div>
 
       <nav className="nav-section">
@@ -35,8 +35,16 @@ export const Sidebar: React.FC = () => {
           end
           className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
         >
+          <LayoutDashboard className="nav-icon" size={18} />
+          Dashboard
+        </NavLink>
+
+        <NavLink
+          to="/operations"
+          className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+        >
           <Home className="nav-icon" size={18} />
-          Home
+          Operations
         </NavLink>
 
         <NavLink
@@ -79,6 +87,14 @@ export const Sidebar: React.FC = () => {
         >
           <Settings className="nav-icon" size={18} />
           Réglages
+        </NavLink>
+
+        <NavLink
+          to="/info"
+          className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+        >
+          <CircleHelp className="nav-icon" size={18} />
+          Info
         </NavLink>
       </nav>
 

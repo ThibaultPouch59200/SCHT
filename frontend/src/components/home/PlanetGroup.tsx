@@ -30,7 +30,10 @@ export const PlanetGroup: React.FC<PlanetGroupProps> = ({ planet, system, statio
         <div className="planet-name">{planet}</div>
         <div className="planet-system">{system}</div>
         <div className="planet-scu">
-          {delivScu} / <strong>{totalScu}</strong> SCU livré
+          <span className="planet-scu-label">LIVRÉ</span>
+          <span className="planet-scu-value">
+            {delivScu} / <strong>{totalScu}</strong> SCU
+          </span>
         </div>
       </div>
 
