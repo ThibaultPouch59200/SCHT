@@ -20,6 +20,7 @@ interface CargoFormLine {
 export const Missions: React.FC = () => {
   const missions = useMissionStore((s) => s.missions);
   const completedIds = useMissionStore((s) => s.completedIds);
+  const deliveredById = useMissionStore((s) => s.deliveredById);
   const addMission = useMissionStore((s) => s.addMission);
   const deleteMission = useMissionStore((s) => s.deleteMission);
 
@@ -223,7 +224,7 @@ export const Missions: React.FC = () => {
             {(() => {
               const existingScu = missions
                 .filter((m) => !completedIds.includes(m.id))
-                .reduce((sum, m) => sum + m.cargos.reduce((s, c) => s + c.scu, 0), 0);
+                .reduce((sum, m) => sum + m.cargos.reduce((s, c) => s + Math.max(0, c.scu - (c.id != null ? (deliveredById[c.id] ?? 0) : 0)), 0), 0);
               const formScu = cargoLines.reduce((sum, l) => sum + (parseInt(l.scu) || 0), 0);
               const totalScu = existingScu + formScu;
               const cap = selectedShip?.scu ?? null;

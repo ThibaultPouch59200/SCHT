@@ -62,6 +62,7 @@ const SYSTEMS = ['Tous', 'Stanton', 'Pyro', 'Nyx'];
 export const Home: React.FC = () => {
   const missions = useMissionStore((s) => s.missions);
   const completedIds = useMissionStore((s) => s.completedIds);
+  const deliveredById = useMissionStore((s) => s.deliveredById);
   const sysFilter = useMissionStore((s) => s.sysFilter);
   const setSysFilter = useMissionStore((s) => s.setSysFilter);
 
@@ -72,7 +73,7 @@ export const Home: React.FC = () => {
   const entries = Object.entries(planetGroups);
 
   const totalActiveScu = activeMissions.reduce(
-    (sum, m) => sum + m.cargos.reduce((s, c) => s + c.scu, 0),
+    (sum, m) => sum + m.cargos.reduce((s, c) => s + Math.max(0, c.scu - (c.id != null ? (deliveredById[c.id] ?? 0) : 0)), 0),
     0
   );
   const cap = selectedShip?.scu ?? null;
