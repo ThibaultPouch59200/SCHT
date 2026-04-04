@@ -380,3 +380,32 @@ html[data-theme="light"] body::before{display:none;}
 .login-switch:hover{color:var(--accent);}
 /* Topbar user badge */
 .topbar-user{font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;color:var(--text-mid);margin-right:4px;}
+
+/* SHIP SELECTION (Settings) */
+.ship-select-row{display:flex;flex-direction:column;gap:10px;}
+.ship-select{width:100%;padding:9px 12px;font-size:12px;font-family:var(--font-mono);background:var(--bg-deep);border:1px solid var(--border-mid);color:var(--text-hi);outline:none;transition:border-color 0.15s;clip-path:polygon(6px 0%,100% 0%,100% 100%,0% 100%,0% 6px);}
+.ship-select:focus{border-color:var(--accent);}
+.ship-select option,.ship-select optgroup{background:var(--bg-card);color:var(--text-hi);}
+.ship-selected-info{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--accent-dim);border:1px solid rgba(0,180,255,0.3);font-family:var(--font-mono);}
+.ship-selected-name{font-size:13px;font-weight:600;color:var(--accent);letter-spacing:0.08em;}
+.ship-selected-meta{font-size:11px;color:var(--text-mid);letter-spacing:0.08em;}
+
+/* SCU PROGRESS BAR (Mission form) */
+.scu-bar-block{padding:10px 14px;background:var(--bg-deep);border:1px solid var(--border);margin-bottom:8px;}
+.scu-bar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.scu-bar-label{font-size:9px;font-family:var(--font-mono);letter-spacing:0.2em;text-transform:uppercase;color:var(--text-low);}
+.scu-bar-value{font-size:13px;font-family:var(--font-mono);font-weight:700;letter-spacing:0.08em;transition:color 0.2s;}
+.scu-bar-track{position:relative;height:8px;background:var(--bg-hover);border:1px solid var(--border);display:flex;overflow:hidden;}
+.scu-bar-fill{height:100%;transition:width 0.2s ease;}
+.scu-bar-existing{background:var(--text-low);opacity:0.6;}
+.scu-bar-new{transition:width 0.15s ease, background-color 0.2s ease;}
+.scu-bar-legend{display:flex;gap:16px;margin-top:6px;}
+.scu-legend-existing{font-size:10px;font-family:var(--font-mono);color:var(--text-low);}
+.scu-legend-new{font-size:10px;font-family:var(--font-mono);transition:color 0.2s;}
+.scu-overload-banner{padding:9px 14px;background:rgba(255,60,60,0.1);border:1px solid rgba(255,60,60,0.4);color:#ff6b6b;font-size:12px;font-family:var(--font-mono);letter-spacing:0.05em;margin-bottom:10px;}
+
+/* SCU INDICATOR (Operations filter bar) */
+.scu-ops-indicator{display:flex;align-items:center;gap:8px;margin-left:auto;padding:4px 12px;border:1px solid var(--border);background:var(--bg-card);}
+.scu-ops-label{font-size:9px;font-family:var(--font-mono);letter-spacing:0.2em;text-transform:uppercase;color:var(--text-low);}
+.scu-ops-value{font-size:13px;font-family:var(--font-mono);font-weight:700;letter-spacing:0.06em;}
+.scu-ops-overload{font-size:9px;font-family:var(--font-mono);letter-spacing:0.15em;color:var(--red);border:1px solid var(--red);padding:1px 5px;animation:pulse 1.2s infinite;}

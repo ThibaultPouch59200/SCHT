@@ -1,3 +1,11 @@
+export interface Ship {
+  id: number
+  name: string
+  manufacturer: string
+  scu: number
+  category: string
+}
+
 export interface CargoLine {
   id?: number;  // present when fetched from API
   res: string;

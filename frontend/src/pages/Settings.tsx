@@ -1,7 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, Plus, ChevronRight, Download, Upload, FileDown } from 'lucide-react';
 import { useListsStore } from '../store/useListsStore';
+import { useShipStore } from '../store/useShipStore';
 import { STANTON_LOCATIONS } from '../data/stantonLocations';
+import type { Ship } from '../types';
 
 const STORE_KEYS = ['scht-missions', 'scht-finance', 'scht-lists'] as const;
 
@@ -54,6 +56,29 @@ export const Settings: React.FC = () => {
   const removeLocation = useListsStore((s) => s.removeLocation);
   const addResource = useListsStore((s) => s.addResource);
   const removeResource = useListsStore((s) => s.removeResource);
+
+  const ships = useShipStore((s) => s.ships);
+  const selectedShip = useShipStore((s) => s.selectedShip);
+  const fetchShips = useShipStore((s) => s.fetchShips);
+  const loadSelectedShip = useShipStore((s) => s.loadSelectedShip);
+  const setSelectedShip = useShipStore((s) => s.setSelectedShip);
+
+  useEffect(() => {
+    fetchShips();
+    loadSelectedShip();
+  }, [fetchShips, loadSelectedShip]);
+
+  const SHIP_CATEGORIES = ['Petit cargo', 'Cargo moyen', 'Gros cargo'];
+
+  const handleShipChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    if (!val) {
+      setSelectedShip(null);
+      return;
+    }
+    const ship = ships.find((s: Ship) => String(s.id) === val);
+    if (ship) setSelectedShip(ship);
+  };
 
   const alreadyImported = STANTON_LOCATIONS.every((l) =>
     locations.some((existing) => existing.name === l.name)
@@ -128,6 +153,39 @@ export const Settings: React.FC = () => {
   return (
     <div className="page-anim" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
       <div className="content">
+
+        {/* MON VAISSEAU */}
+        <div className="settings-section">
+          <div className="settings-section-title">// Mon vaisseau</div>
+          <div className="ship-select-row">
+            <select
+              className="ship-select"
+              value={selectedShip ? String(selectedShip.id) : ''}
+              onChange={handleShipChange}
+            >
+              <option value="">— Choisir un vaisseau —</option>
+              {SHIP_CATEGORIES.map((cat) => {
+                const catShips = ships.filter((s: Ship) => s.category === cat);
+                if (catShips.length === 0) return null;
+                return (
+                  <optgroup key={cat} label={cat}>
+                    {catShips.map((s: Ship) => (
+                      <option key={s.id} value={String(s.id)}>
+                        {s.name} — {s.manufacturer} — {s.scu} SCU
+                      </option>
+                    ))}
+                  </optgroup>
+                );
+              })}
+            </select>
+            {selectedShip && (
+              <div className="ship-selected-info">
+                <span className="ship-selected-name">{selectedShip.name}</span>
+                <span className="ship-selected-meta">{selectedShip.manufacturer} · {selectedShip.scu} SCU · {selectedShip.category}</span>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* LIEUX (origines + destinations fusionnés) */}
         <div className="settings-section">

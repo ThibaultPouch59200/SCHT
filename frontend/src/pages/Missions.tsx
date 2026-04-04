@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Plus, X, Copy } from 'lucide-react';
 import type { Mission } from '../types';
 import { useMissionStore } from '../store/useMissionStore';
 import { useListsStore } from '../store/useListsStore';
+import { useShipStore } from '../store/useShipStore';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { ComboSelect } from '../components/ui/ComboSelect';
 import { parseAmount, fmtShort } from '../utils/parseAmount';
@@ -27,6 +28,13 @@ export const Missions: React.FC = () => {
   const addLocation = useListsStore((s) => s.addLocation);
   const addResource = useListsStore((s) => s.addResource);
 
+  const selectedShip = useShipStore((s) => s.selectedShip);
+  const loadSelectedShip = useShipStore((s) => s.loadSelectedShip);
+
+  useEffect(() => {
+    loadSelectedShip();
+  }, [loadSelectedShip]);
+
   const locationNames = locations.map((l) => l.name);
 
   const [formOpen, setFormOpen] = useState(false);
@@ -45,7 +53,7 @@ export const Missions: React.FC = () => {
     setFormOpen(true);
   };
 
-  const copyMission = (m: Mission) => {
+  const copyMission = (m: Mission, scroll = true) => {
     const lines = m.cargos.map((c) => {
       cargoIdRef.current += 1;
       return { id: cargoIdRef.current, res: c.res, scu: String(c.scu), dest: c.dest, planet: c.planet };
@@ -55,7 +63,7 @@ export const Missions: React.FC = () => {
     setPay(m.pay > 0 ? String(m.pay) : '');
     setCargoLines(lines);
     setFormOpen(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (scroll) window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const addCargoLine = () => {
@@ -149,6 +157,34 @@ export const Missions: React.FC = () => {
         {formOpen && (
           <div className="mission-form-panel">
             <div className="form-title">// Enregistrement mission cargo</div>
+
+            {missions.filter((m) => !completedIds.includes(m.id)).length > 0 && (
+              <div className="form-field" style={{ marginBottom: '12px' }}>
+                <label>Charger depuis une mission existante</label>
+                <select
+                  defaultValue=""
+                  onChange={(e) => {
+                    const id = parseInt(e.target.value);
+                    const m = missions.find((x) => x.id === id);
+                    if (m) copyMission(m, false);
+                    e.target.value = '';
+                  }}
+                >
+                  <option value="" disabled>— Sélectionner un modèle —</option>
+                  {missions.filter((m) => !completedIds.includes(m.id)).map((m) => {
+                    const totalScu = m.cargos.reduce((a, c) => a + c.scu, 0);
+                    const dests = [...new Set(m.cargos.map((c) => c.dest))].length;
+                    return (
+                      <option key={m.id} value={m.id}>
+                        {m.origin} → [{dests} dest.] — {totalScu} SCU
+                        {m.pay > 0 ? ` — ${fmtShort(m.pay)} aUEC` : ''}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            )}
+
             <div className="form-grid-3">
               <div className="form-field">
                 <label>Lieu de récupération</label>
@@ -184,6 +220,55 @@ export const Missions: React.FC = () => {
               </div>
             </div>
 
+            {(() => {
+              const existingScu = missions
+                .filter((m) => !completedIds.includes(m.id))
+                .reduce((sum, m) => sum + m.cargos.reduce((s, c) => s + c.scu, 0), 0);
+              const formScu = cargoLines.reduce((sum, l) => sum + (parseInt(l.scu) || 0), 0);
+              const totalScu = existingScu + formScu;
+              const cap = selectedShip?.scu ?? null;
+              const pctExisting = cap ? Math.min(existingScu / cap, 1) : 0;
+              const pctForm = cap ? Math.min(formScu / cap, Math.max(0, 1 - pctExisting)) : 0;
+              const overloaded = cap !== null && totalScu > cap;
+              const barColor = cap === null
+                ? 'var(--accent)'
+                : overloaded
+                  ? 'var(--red)'
+                  : totalScu / cap > 0.8
+                    ? 'var(--amber)'
+                    : 'var(--green)';
+              return (
+                <>
+                  <div className="scu-bar-block">
+                    <div className="scu-bar-header">
+                      <span className="scu-bar-label">CAPACITÉ VAISSEAU</span>
+                      <span className="scu-bar-value" style={{ color: barColor }}>
+                        {totalScu} / {cap !== null ? `${cap} SCU` : '— SCU'}
+                      </span>
+                    </div>
+                    <div className="scu-bar-track">
+                      <div
+                        className="scu-bar-fill scu-bar-existing"
+                        style={{ width: `${pctExisting * 100}%` }}
+                      />
+                      <div
+                        className="scu-bar-fill scu-bar-new"
+                        style={{ width: `${pctForm * 100}%`, backgroundColor: barColor }}
+                      />
+                    </div>
+                    <div className="scu-bar-legend">
+                      <span className="scu-legend-existing">▮ Missions existantes ({existingScu} SCU)</span>
+                      <span className="scu-legend-new" style={{ color: barColor }}>▮ Cette mission ({formScu} SCU)</span>
+                    </div>
+                  </div>
+                  {overloaded && (
+                    <div className="scu-overload-banner">
+                      ⚠ Chargement dépassé — votre vaisseau ne peut pas transporter tout ce cargo
+                    </div>
+                  )}
+                </>
+              );
+            })()}
             <div className="cargo-section-title">// Cargaisons — lieux de livraison</div>
             <div className="cargo-inputs">
               {cargoLines.map((line) => {

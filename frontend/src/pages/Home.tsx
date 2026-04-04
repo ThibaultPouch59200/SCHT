@@ -1,5 +1,6 @@
 import React from 'react';
 import { useMissionStore } from '../store/useMissionStore';
+import { useShipStore } from '../store/useShipStore';
 import { PlanetGroup } from '../components/home/PlanetGroup';
 
 export interface CargoLineInfo {
@@ -64,9 +65,25 @@ export const Home: React.FC = () => {
   const sysFilter = useMissionStore((s) => s.sysFilter);
   const setSysFilter = useMissionStore((s) => s.setSysFilter);
 
+  const selectedShip = useShipStore((s) => s.selectedShip);
+
   const activeMissions = missions.filter((m) => !completedIds.includes(m.id));
   const planetGroups = buildGroups(activeMissions, sysFilter);
   const entries = Object.entries(planetGroups);
+
+  const totalActiveScu = activeMissions.reduce(
+    (sum, m) => sum + m.cargos.reduce((s, c) => s + c.scu, 0),
+    0
+  );
+  const cap = selectedShip?.scu ?? null;
+  const pct = cap ? totalActiveScu / cap : 0;
+  const scuColor = cap === null
+    ? 'var(--text-dim)'
+    : totalActiveScu > cap
+      ? 'var(--red)'
+      : pct > 0.8
+        ? 'var(--amber)'
+        : 'var(--green)';
 
   return (
     <div
@@ -87,6 +104,15 @@ export const Home: React.FC = () => {
             </button>
           );
         })}
+        <div className="scu-ops-indicator" style={{ color: scuColor }}>
+          <span className="scu-ops-label">CARGO</span>
+          <span className="scu-ops-value">
+            {totalActiveScu} / {cap !== null ? `${cap} SCU` : '— SCU'}
+          </span>
+          {cap !== null && totalActiveScu > cap && (
+            <span className="scu-ops-overload">SURCHARGE</span>
+          )}
+        </div>
       </div>
 
       <div className="content">
