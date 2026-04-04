@@ -45,7 +45,12 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ username, password }),
       }),
-    me: () => request<{ id: number; username: string }>('/api/auth/me'),
+    me: () =>
+      request<{
+        id: number;
+        username: string;
+        selectedShip?: { id: number; name: string; manufacturer: string; scu: number; category: string } | null;
+      }>('/api/auth/me'),
   },
 
   // ── Locations ─────────────────────────────────────────────────────────
@@ -93,6 +98,19 @@ export const api = {
 
     copy: (id: number) =>
       request<SerializedMission>(`/api/missions/${id}/copy`, { method: 'POST' }),
+  },
+
+  // ── Ships ─────────────────────────────────────────────────────────────
+  ships: {
+    list: () =>
+      request<{ id: number; name: string; manufacturer: string; scu: number; category: string }[]>(
+        '/api/ships'
+      ),
+    selectShip: (shipId: number) =>
+      request<{ selectedShip: { id: number; name: string; manufacturer: string; scu: number; category: string } | null }>(
+        '/api/auth/me/ship',
+        { method: 'PUT', body: JSON.stringify({ shipId }) }
+      ),
   },
 
   // ── Finance ───────────────────────────────────────────────────────────
