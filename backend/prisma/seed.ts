@@ -116,7 +116,7 @@ const RESOURCES = [
   // Industrial
   'Scrap',
   'Neon',
-  'E'tam',
+  "E'tam",
   'Maze',
   'WiDoW',
   'Slam',
