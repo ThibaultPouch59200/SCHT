@@ -2,10 +2,12 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Sidebar } from './components/layout/Sidebar';
 import { Topbar } from './components/layout/Topbar';
+import { Dashboard } from './pages/Dashboard';
 import { Home } from './pages/Home';
 import { Missions } from './pages/Missions';
 import { History } from './pages/History';
 import { Finance } from './pages/Finance';
+import { Info } from './pages/Info';
 import { Settings } from './pages/Settings';
 import { LoginPage } from './pages/LoginPage';
 import { AppLoader } from './components/AppLoader';
@@ -31,10 +33,12 @@ function App() {
       <div className="main">
         <Topbar />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/operations" element={<Home />} />
           <Route path="/missions" element={<Missions />} />
           <Route path="/history" element={<History />} />
           <Route path="/finance" element={<Finance />} />
+          <Route path="/info" element={<Info />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </div>
