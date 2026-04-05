@@ -248,7 +248,7 @@ export const Settings: React.FC = () => {
                           <span className="settings-item-name">{loc.name}</span>
                           <button
                             className="settings-del-btn"
-                            onClick={() => removeLocation(loc.name)}
+                            onClick={() => removeLocation(loc.name, loc.system)}
                             aria-label={`Supprimer ${loc.name}`}
                           >
                             <X size={11} />

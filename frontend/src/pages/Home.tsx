@@ -5,13 +5,13 @@ import { PlanetGroup } from '../components/home/PlanetGroup';
 
 export interface CargoLineInfo {
   id: number;
+  missionId: number;
   res: string;
   scu: number;
 }
 
 export interface StationInfo {
-  key: string;       // `${missionId}|${stationName}`
-  missionId: number;
+  key: string;       // `${system}|${planet}|${normalizedStationName}`
   name: string;
   cargos: CargoLineInfo[];
 }
@@ -20,6 +20,10 @@ export interface PlanetGroupData {
   system: string;
   planet: string;
   stations: StationInfo[];
+}
+
+function normalizeText(value: string): string {
+  return value.trim().replace(/\s+/g, ' ').toLowerCase();
 }
 
 function buildGroups(
@@ -31,27 +35,44 @@ function buildGroups(
   missions.forEach((m) => {
     if (sysFilter !== 'all' && m.system !== sysFilter) return;
 
-    // Group this mission's cargos by destination station
-    const byStation: Record<string, CargoLineInfo[]> = {};
     m.cargos.forEach((c: any) => {
-      if (!byStation[c.dest]) byStation[c.dest] = [];
-      byStation[c.dest].push({ id: c.id, res: c.res, scu: c.scu });
-    });
+      const stationName = String(c.dest ?? '').trim();
+      const planetName = String(c.planet ?? '').trim() || m.system;
+      if (!stationName) return;
 
-    Object.entries(byStation).forEach(([dest, cargos]) => {
-      // Find planet for this destination
-      const planet = m.cargos.find((c: any) => c.dest === dest)?.planet ?? m.system;
-      const planetKey = `${m.system}|${planet}`;
+      const normalizedPlanet = normalizeText(planetName);
+      const planetKey = `${m.system}|${normalizedPlanet}`;
+
       if (!planets[planetKey]) {
-        planets[planetKey] = { system: m.system, planet, stations: [] };
+        planets[planetKey] = { system: m.system, planet: planetName, stations: [] };
       }
-      planets[planetKey].stations.push({
-        key: `${m.id}|${dest}`,
+
+      const stationKey = normalizeText(stationName);
+      const station = planets[planetKey].stations.find(
+        (s) => normalizeText(s.name) === stationKey
+      );
+
+      const cargoLine: CargoLineInfo = {
+        id: c.id,
         missionId: m.id,
-        name: dest,
-        cargos,
-      });
+        res: c.res,
+        scu: c.scu,
+      };
+
+      if (station) {
+        station.cargos.push(cargoLine);
+      } else {
+        planets[planetKey].stations.push({
+          key: `${m.system}|${normalizedPlanet}|${stationKey}`,
+          name: stationName,
+          cargos: [cargoLine],
+        });
+      }
     });
+  });
+
+  Object.values(planets).forEach((planetGroup) => {
+    planetGroup.stations.sort((a, b) => a.name.localeCompare(b.name));
   });
 
   return planets;

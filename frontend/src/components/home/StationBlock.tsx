@@ -23,7 +23,10 @@ export const StationBlock: React.FC<StationBlockProps> = ({ station }) => {
   const allDone = station.cargos.every((c) => (deliveredById[c.id] ?? 0) >= c.scu);
 
   const handleConfirm = () => {
-    confirmStation(station.missionId, station.name);
+    const missionIds = [...new Set(station.cargos.map((c) => c.missionId))];
+    missionIds.forEach((missionId) => {
+      void confirmStation(missionId, station.name);
+    });
     setModalOpen(false);
   };
 
@@ -79,7 +82,7 @@ export const StationBlock: React.FC<StationBlockProps> = ({ station }) => {
                 scu={c.scu}
                 deliveredAmount={deliveredById[c.id] ?? 0}
                 onSetAmount={(amount) =>
-                  setDeliveredAmount(station.missionId, c.id, amount)
+                  setDeliveredAmount(c.missionId, c.id, amount)
                 }
               />
             ))}
