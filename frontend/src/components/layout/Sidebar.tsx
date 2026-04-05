@@ -4,12 +4,14 @@ import { LayoutDashboard, Home, Package, Clock, TrendingUp, Settings, CircleHelp
 import { useMissionStore } from '../../store/useMissionStore';
 import { useFinanceStore } from '../../store/useFinanceStore';
 import { fmtShort } from '../../utils/parseAmount';
+import { useBackendStatus } from '../../hooks/useBackendStatus';
 
 export const Sidebar: React.FC = () => {
   const missions = useMissionStore((s) => s.missions);
   const completedIds = useMissionStore((s) => s.completedIds);
   const wallet = useFinanceStore((s) => s.wallet);
 
+  const backendStatus = useBackendStatus();
   const activeMissions = missions.filter((m) => !completedIds.includes(m.id));
   const completedMissions = missions.filter((m) => completedIds.includes(m.id));
   const totalScu = missions.reduce(
@@ -100,8 +102,8 @@ export const Sidebar: React.FC = () => {
 
       <div className="sidebar-status">
         <div className="status-row">
-          <div className="status-dot" />
-          SYSTEM ONLINE
+          <div className={`status-dot${backendStatus === 'offline' ? ' status-dot--offline' : backendStatus === 'checking' ? ' status-dot--checking' : ''}`} />
+          {backendStatus === 'online' ? 'BACKEND ONLINE' : backendStatus === 'offline' ? 'BACKEND OFFLINE' : 'CONNECTING...'}
         </div>
         <div style={{ marginTop: '6px', color: 'var(--amber)', fontSize: '11px' }}>
           WALLET : {fmtShort(wallet)} aUEC
