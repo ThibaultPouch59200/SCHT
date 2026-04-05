@@ -7,7 +7,7 @@ RUN npm ci
 # ── Stage 2 : build ──────────────────────────────────────────────────────────
 FROM node:current-alpine AS builder
 WORKDIR /app
-ARG VITE_API_URL=http://localhost:4000
+ARG VITE_API_URL=
 ENV VITE_API_URL=$VITE_API_URL
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
