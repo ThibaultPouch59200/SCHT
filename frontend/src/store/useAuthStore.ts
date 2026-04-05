@@ -33,7 +33,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
       localStorage.setItem('scht-username', name);
       set({ token, username: name, loading: false });
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : 'Login failed';
+      const msg = e instanceof ApiError ? e.message
+        : e instanceof TypeError ? 'Impossible de joindre le serveur. Vérifiez la configuration.'
+        : 'Login failed';
       set({ loading: false, error: msg });
     }
   },
@@ -46,7 +48,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
       localStorage.setItem('scht-username', name);
       set({ token, username: name, loading: false });
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : 'Registration failed';
+      const msg = e instanceof ApiError ? e.message
+        : e instanceof TypeError ? 'Impossible de joindre le serveur. Vérifiez la configuration.'
+        : 'Registration failed';
       set({ loading: false, error: msg });
     }
   },
