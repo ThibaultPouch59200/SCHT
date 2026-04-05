@@ -13,7 +13,7 @@ interface ListsStore {
   loading: boolean;
   fetch: () => Promise<void>;
   addLocation: (entry: LocationEntry) => void;
-  removeLocation: (name: string) => void;
+  removeLocation: (name: string, system: string) => void;
   addResource: (name: string) => void;
   removeResource: (name: string) => void;
 }
@@ -33,23 +33,67 @@ export const useListsStore = create<ListsStore>((set) => ({
     });
   },
 
-  addLocation: (entry) =>
+  addLocation: (entry) => {
+    const trimmedEntry = {
+      name: entry.name.trim(),
+      planet: entry.planet.trim(),
+      system: entry.system.trim(),
+    };
+
+    if (!trimmedEntry.name || !trimmedEntry.planet || !trimmedEntry.system) return;
+
     set((s) => ({
-      locations: s.locations.some((l) => l.name === entry.name)
+      locations: s.locations.some(
+        (l) => l.name === trimmedEntry.name && l.system === trimmedEntry.system
+      )
         ? s.locations
-        : [...s.locations, entry],
-    })),
+        : [...s.locations, trimmedEntry],
+    }));
 
-  removeLocation: (name) =>
+    void api.locations.create(trimmedEntry).catch(() => {
+      void useListsStore.getState().fetch();
+    });
+  },
+
+  removeLocation: (name, system) => {
+    const safeName = name.trim();
+    const safeSystem = system.trim();
+    if (!safeName || !safeSystem) return;
+
+    const previous = useListsStore.getState().locations;
+
     set((s) => ({
-      locations: s.locations.filter((l) => l.name !== name),
-    })),
+      locations: s.locations.filter((l) => !(l.name === safeName && l.system === safeSystem)),
+    }));
 
-  addResource: (name) =>
+    void api.locations.remove(safeName, safeSystem).catch(() => {
+      set({ locations: previous });
+    });
+  },
+
+  addResource: (name) => {
+    const safeName = name.trim();
+    if (!safeName) return;
+
     set((s) => ({
-      resources: s.resources.includes(name) ? s.resources : [...s.resources, name],
-    })),
+      resources: s.resources.includes(safeName) ? s.resources : [...s.resources, safeName],
+    }));
 
-  removeResource: (name) =>
-    set((s) => ({ resources: s.resources.filter((r) => r !== name) })),
+    void api.resources.create(safeName).catch(() => {
+      void useListsStore.getState().fetch();
+    });
+  },
+
+  removeResource: (name) => {
+    const safeName = name.trim();
+    if (!safeName) return;
+
+    const previous = useListsStore.getState().resources;
+
+    set((s) => ({ resources: s.resources.filter((r) => r !== safeName) }));
+
+    void api.resources.remove(safeName).catch(() => {
+      set({ resources: previous });
+    });
+  },
 }));

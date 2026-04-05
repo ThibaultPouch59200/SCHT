@@ -59,11 +59,33 @@ export const api = {
       request<{ id: number; name: string; planet: string; system: string }[]>(
         '/api/locations'
       ),
+    create: (data: { name: string; planet: string; system: string }) =>
+      request<{ id: number; name: string; planet: string; system: string }>(
+        '/api/locations',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        }
+      ),
+    remove: (name: string, system: string) =>
+      request<{ ok: boolean }>(
+        `/api/locations?name=${encodeURIComponent(name)}&system=${encodeURIComponent(system)}`,
+        { method: 'DELETE' }
+      ),
   },
 
   // ── Resources ─────────────────────────────────────────────────────────
   resources: {
     list: () => request<{ id: number; name: string }[]>('/api/resources'),
+    create: (name: string) =>
+      request<{ id: number; name: string }>('/api/resources', {
+        method: 'POST',
+        body: JSON.stringify({ name }),
+      }),
+    remove: (name: string) =>
+      request<{ ok: boolean }>(`/api/resources/${encodeURIComponent(name)}`, {
+        method: 'DELETE',
+      }),
   },
 
   // ── Missions ──────────────────────────────────────────────────────────
