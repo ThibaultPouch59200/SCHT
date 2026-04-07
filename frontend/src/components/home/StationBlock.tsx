@@ -39,10 +39,7 @@ export const StationBlock: React.FC<StationBlockProps> = ({ station }) => {
   return (
     <>
       <div className={`station-block${allDone ? ' all-done' : ''}`}>
-        <div
-          className="station-header"
-          onClick={() => { if (!allDone) setModalOpen(true); }}
-        >
+        <div className="station-header">
           <div className="station-title">
             {station.name}
             {allDone ? ' ✓' : ''}

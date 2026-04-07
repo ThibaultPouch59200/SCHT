@@ -121,7 +121,7 @@ html[data-theme="light"] body::before{display:none;}
 .station-block{border:1px solid var(--border);background:var(--bg-card);clip-path:polygon(16px 0%,100% 0%,100% calc(100% - 10px),calc(100% - 10px) 100%,0% 100%,0% 0%);overflow:hidden;transition:border-color 0.2s;}
 .station-block:hover{border-color:var(--border-mid);}
 .station-block.all-done{border-color:rgba(0,255,176,0.25);}
-.station-header{display:grid;grid-template-columns:1fr auto auto auto auto;align-items:center;gap:16px;padding:10px 16px;background:rgba(0,180,255,0.04);border-bottom:1px solid var(--border);cursor:pointer;user-select:none;}
+.station-header{display:grid;grid-template-columns:1fr auto auto auto auto;align-items:center;gap:16px;padding:10px 16px;background:rgba(0,180,255,0.04);border-bottom:1px solid var(--border);cursor:default;user-select:none;}
 .station-collapse-btn{width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text-low);border:1px solid var(--border);background:transparent;cursor:pointer;transition:all 0.15s;flex-shrink:0;}
 .station-collapse-btn:hover{border-color:var(--border-mid);color:var(--text-mid);}
 .station-header:hover{background:var(--accent-dim);}
