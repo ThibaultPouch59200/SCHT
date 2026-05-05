@@ -1,18 +1,7 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 interface ThemeStore {
-  theme: 'dark' | 'light';
-  toggleTheme: () => void;
+  theme: 'dark';
 }
 
-export const useThemeStore = create<ThemeStore>()(
-  persist(
-    (set) => ({
-      theme: 'dark',
-      toggleTheme: () =>
-        set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
-    }),
-    { name: 'scht-theme' }
-  )
-);
+export const useThemeStore = create<ThemeStore>()(() => ({ theme: 'dark' as const }));

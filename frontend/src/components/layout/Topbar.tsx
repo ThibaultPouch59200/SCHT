@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { Moon, Sun, LogOut } from 'lucide-react';
-import { useThemeStore } from '../../store/useThemeStore';
+import { LogOut } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 
 const pageTitles: Record<string, string> = {
@@ -16,7 +15,6 @@ const pageTitles: Record<string, string> = {
 
 export const Topbar: React.FC = () => {
   const location = useLocation();
-  const { theme, toggleTheme } = useThemeStore();
   const { username, logout } = useAuthStore();
 
   const title = pageTitles[location.pathname] ?? 'SC HAULING';
@@ -36,9 +34,6 @@ export const Topbar: React.FC = () => {
         START THE PROJECT
       </a>
       <span className="topbar-user">{username}</span>
-      <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
-        {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-      </button>
       <button className="theme-toggle" onClick={logout} title="Se déconnecter">
         <LogOut size={15} />
       </button>
