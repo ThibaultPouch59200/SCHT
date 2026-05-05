@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        hud: ['Rajdhani', 'sans-serif'],
-        mono: ['Share Tech Mono', 'monospace'],
+        hud: ['Trebuchet MS', 'Segoe UI', 'Tahoma', 'sans-serif'],
+        mono: ['Courier New', 'Lucida Console', 'monospace'],
       },
     },
   },
