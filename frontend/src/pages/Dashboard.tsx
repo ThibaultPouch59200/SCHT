@@ -95,7 +95,7 @@ export const Dashboard: React.FC = () => {
       {
         data: chartValues,
         borderColor: '#ffb347',
-        backgroundColor: 'rgba(255,179,71,0.07)',
+        backgroundColor: 'rgba(255,160,0,0.07)',
         borderWidth: 2,
         pointRadius: 3,
         pointBackgroundColor: '#ffb347',
