@@ -92,7 +92,7 @@ export const Finance: React.FC = () => {
         borderWidth: 2,
         pointRadius: 3,
         pointBackgroundColor: '#ffb347',
-        pointBorderColor: '#050a0f',
+        pointBorderColor: '#1a1916',
         pointBorderWidth: 1.5,
         tension: 0.35,
         fill: true,
@@ -107,7 +107,7 @@ export const Finance: React.FC = () => {
       legend: { display: false },
       tooltip: {
         backgroundColor: '#0c1520',
-        borderColor: 'rgba(0,180,255,0.3)',
+        borderColor: 'rgba(255,160,0,0.3)',
         borderWidth: 1,
         titleColor: '#7aa8c4',
         bodyColor: '#e8f4ff',
@@ -118,18 +118,18 @@ export const Finance: React.FC = () => {
     },
     scales: {
       x: {
-        grid: { color: 'rgba(0,180,255,0.07)' },
+        grid: { color: 'rgba(255,160,0,0.07)' },
         ticks: {
           color: '#3d6680',
-          font: { family: "'Share Tech Mono'", size: 10 },
+          font: { family: "'Courier New'", size: 10 },
           maxTicksLimit: 10,
         },
       },
       y: {
-        grid: { color: 'rgba(0,180,255,0.07)' },
+        grid: { color: 'rgba(255,160,0,0.07)' },
         ticks: {
           color: '#3d6680',
-          font: { family: "'Share Tech Mono'", size: 10 },
+          font: { family: "'Courier New'", size: 10 },
           callback: (value: string | number) => fmtShort(Number(value)),
         },
       },
