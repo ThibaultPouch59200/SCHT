@@ -67,7 +67,7 @@ export const Sidebar: React.FC = () => {
           <Clock className="nav-icon" size={18} />
           Historique
           {completedMissions.length > 0 && (
-            <span className="nav-badge" style={{ borderColor: 'rgba(0,255,176,0.3)', color: 'var(--green)', background: 'var(--green-dim)' }}>
+            <span className="nav-badge" style={{ borderColor: 'var(--green)', color: 'var(--green)', background: 'var(--green-dim)' }}>
               {completedMissions.length}
             </span>
           )}
