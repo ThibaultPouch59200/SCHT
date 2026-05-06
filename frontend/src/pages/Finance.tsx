@@ -87,11 +87,11 @@ export const Finance: React.FC = () => {
     datasets: [
       {
         data: chartValues,
-        borderColor: '#ffb347',
+        borderColor: '#ffa000',
         backgroundColor: 'rgba(255,160,0,0.07)',
         borderWidth: 2,
         pointRadius: 3,
-        pointBackgroundColor: '#ffb347',
+        pointBackgroundColor: '#ffa000',
         pointBorderColor: '#1a1916',
         pointBorderWidth: 1.5,
         tension: 0.35,
@@ -106,11 +106,11 @@ export const Finance: React.FC = () => {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#0c1520',
+        backgroundColor: '#2b2921',
         borderColor: 'rgba(255,160,0,0.3)',
         borderWidth: 1,
-        titleColor: '#7aa8c4',
-        bodyColor: '#e8f4ff',
+        titleColor: '#a09888',
+        bodyColor: '#e0d8c8',
         callbacks: {
           label: (ctx: { raw: unknown }) => ' ' + fmtAuec(ctx.raw as number),
         },
@@ -120,7 +120,7 @@ export const Finance: React.FC = () => {
       x: {
         grid: { color: 'rgba(255,160,0,0.07)' },
         ticks: {
-          color: '#3d6680',
+          color: '#706860',
           font: { family: "'Courier New'", size: 10 },
           maxTicksLimit: 10,
         },
@@ -128,7 +128,7 @@ export const Finance: React.FC = () => {
       y: {
         grid: { color: 'rgba(255,160,0,0.07)' },
         ticks: {
-          color: '#3d6680',
+          color: '#706860',
           font: { family: "'Courier New'", size: 10 },
           callback: (value: string | number) => fmtShort(Number(value)),
         },

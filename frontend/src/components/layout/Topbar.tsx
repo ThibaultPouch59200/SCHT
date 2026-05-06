@@ -34,7 +34,7 @@ export const Topbar: React.FC = () => {
         START THE PROJECT
       </a>
       <span className="topbar-user">{username}</span>
-      <button className="theme-toggle" onClick={logout} title="Se déconnecter">
+      <button className="topbar-btn" onClick={logout} title="Se déconnecter">
         <LogOut size={15} />
       </button>
     </div>
