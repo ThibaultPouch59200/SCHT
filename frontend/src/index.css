@@ -8,7 +8,7 @@
   --amber:#ffa000;--amber-dim:rgba(255,160,0,0.12);
   --text-hi:#e0d8c8;--text-mid:#a09888;--text-low:#706860;
   --font-hud:'Trebuchet MS','Segoe UI',Tahoma,sans-serif;--font-mono:'Courier New','Lucida Console',monospace;
-  --accent-hover:rgba(255,160,0,0.25);--green-hover:rgba(93,178,24,0.30);--amber-hover:rgba(255,160,0,0.25);
+  --accent-hover:rgba(255,160,0,0.25);--green-hover:rgba(93,178,24,0.30);--amber-hover:rgba(255,160,0,0.25);--red-hover:rgba(200,64,64,0.25);
 }
 
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -103,7 +103,6 @@ body{
 .station-header{display:grid;grid-template-columns:1fr auto auto auto auto;align-items:center;gap:16px;padding:10px 16px;background:var(--accent-dim);border-bottom:1px solid var(--border);cursor:default;user-select:none;}
 .station-collapse-btn{width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text-low);border:1px solid var(--border);background:transparent;cursor:pointer;transition:all 0.15s;flex-shrink:0;}
 .station-collapse-btn:hover{border-color:var(--border-mid);color:var(--text-mid);}
-.station-header:hover{background:var(--accent-dim);}
 .station-title{font-size:14px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-hi);}
 .station-block.all-done .station-title{color:var(--green);}
 .scu-label{font-family:var(--font-mono);font-size:11px;color:var(--text-low);letter-spacing:0.1em;white-space:nowrap;}
@@ -302,13 +301,13 @@ body{
 /* SETTINGS TREE (system → planet → location) */
 .settings-tree-system{margin-bottom:8px;border:1px solid var(--border);background:var(--bg-card);}
 .settings-tree-system-header{display:flex;align-items:center;gap:8px;padding:9px 14px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);background:var(--accent-dim);transition:background 0.15s;}
-.settings-tree-system-header:hover{background:var(--accent-dim);}
+.settings-tree-system-header:hover{background:var(--accent-hover);}
 .settings-tree-sys-label{font-size:11px;font-weight:700;letter-spacing:0.25em;color:var(--text-hi);font-family:var(--font-mono);text-transform:uppercase;flex:1;}
 .settings-tree-count{font-family:var(--font-mono);font-size:10px;color:var(--text-low);}
 .settings-tree-planet{border-bottom:1px solid var(--border);}
 .settings-tree-planet:last-child{border-bottom:none;}
 .settings-tree-planet-header{display:flex;align-items:center;gap:8px;padding:7px 14px 7px 28px;cursor:pointer;user-select:none;background:var(--accent-dim);transition:background 0.15s;}
-.settings-tree-planet-header:hover{background:var(--accent-dim);}
+.settings-tree-planet-header:hover{background:var(--accent-hover);}
 .settings-tree-planet-label{font-size:12px;font-weight:600;letter-spacing:0.1em;color:var(--text-mid);flex:1;}
 .settings-tree-item{display:flex;align-items:center;gap:10px;padding:7px 14px 7px 44px;border-top:1px solid var(--border);font-size:13px;color:var(--text-mid);transition:background 0.1s;}
 .settings-tree-item:hover{background:var(--bg-hover);}
@@ -342,7 +341,7 @@ body{
 
 /* Import Stanton button */
 .import-stanton-btn{display:inline-flex;align-items:center;padding:9px 20px;font-size:11px;font-family:var(--font-mono);border:1px solid var(--accent);background:var(--accent-dim);cursor:pointer;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;transition:all 0.2s;}
-.import-stanton-btn:hover:not(:disabled){background:var(--accent-dim);border-color:var(--border-hi);}
+.import-stanton-btn:hover:not(:disabled){background:var(--accent-hover);border-color:var(--border-hi);}
 .import-stanton-btn.imported{border-color:var(--green-dim);color:var(--green);background:var(--green-dim);cursor:default;opacity:0.7;}
 
 /* ── Login Page ──────────────────────────────────────────────────────────── */
