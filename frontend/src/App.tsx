@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Sidebar } from './components/layout/Sidebar';
 import { Topbar } from './components/layout/Topbar';
@@ -11,16 +10,10 @@ import { Info } from './pages/Info';
 import { Settings } from './pages/Settings';
 import { LoginPage } from './pages/LoginPage';
 import { AppLoader } from './components/AppLoader';
-import { useThemeStore } from './store/useThemeStore';
 import { useAuthStore } from './store/useAuthStore';
 
 function App() {
-  const theme = useThemeStore((s) => s.theme);
   const token = useAuthStore((s) => s.token);
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
 
   if (!token) {
     return <LoginPage />;
