@@ -16,7 +16,7 @@ export const NavBar: React.FC = () => {
     (acc, m) =>
       acc +
       m.cargos.reduce(
-        (a, c) => a + Math.max(0, c.scu - (deliveredById[c.id] ?? 0)),
+        (a, c) => a + Math.max(0, c.scu - (c.id != null ? (deliveredById[c.id] ?? 0) : 0)),
         0
       ),
     0
