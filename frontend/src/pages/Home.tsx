@@ -140,9 +140,8 @@ export const Home: React.FC = () => {
       <div className="content">
         {entries.length === 0 ? (
           <div className="empty-state">
-            // NO CARGO OPERATIONS FOUND
-            <br />
-            Enregistre des missions pour voir les livraisons.
+            <div className="empty-icon">🚚</div>
+            Aucune opération en cours.<br />Enregistre des missions pour voir les livraisons.
           </div>
         ) : (
           entries.map(([pk, grp]) => (
