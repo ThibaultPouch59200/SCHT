@@ -113,19 +113,20 @@ export const Home: React.FC = () => {
       style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}
     >
       <div className="filter-bar">
-        <span className="filter-label">Système</span>
-        {SYSTEMS.map((sys) => {
-          const val = sys === 'Tous' ? 'all' : sys;
-          return (
-            <button
-              key={sys}
-              className={`filter-btn${sysFilter === val ? ' active' : ''}`}
-              onClick={() => setSysFilter(val)}
-            >
-              {sys}
-            </button>
-          );
-        })}
+        <div className="nav-dock">
+          {SYSTEMS.map((sys) => {
+            const val = sys === 'Tous' ? 'all' : sys;
+            return (
+              <button
+                key={sys}
+                className={`nav-btn${sysFilter === val ? ' active' : ''}`}
+                onClick={() => setSysFilter(val)}
+              >
+                {sys}
+              </button>
+            );
+          })}
+        </div>
         <div className="scu-ops-indicator" style={{ color: scuColor }}>
           <span className="scu-ops-label">CARGO</span>
           <span className="scu-ops-value">
