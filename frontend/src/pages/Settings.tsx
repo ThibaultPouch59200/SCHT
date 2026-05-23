@@ -156,7 +156,7 @@ export const Settings: React.FC = () => {
 
         {/* MON VAISSEAU */}
         <div className="settings-section">
-          <div className="settings-section-title">// Mon vaisseau</div>
+          <div className="settings-section-title">Mon vaisseau</div>
           <div className="ship-select-row">
             <select
               className="ship-select"
@@ -189,7 +189,7 @@ export const Settings: React.FC = () => {
 
         {/* LIEUX (origines + destinations fusionnés) */}
         <div className="settings-section">
-          <div className="settings-section-title">// Lieux (récupération &amp; destinations)</div>
+          <div className="settings-section-title">Lieux (récupération &amp; destinations)</div>
 
           {!alreadyImported && (
             <div style={{ marginBottom: 14 }}>
@@ -298,7 +298,7 @@ export const Settings: React.FC = () => {
 
         {/* RESSOURCES */}
         <div className="settings-section">
-          <div className="settings-section-title">// Ressources / Matières</div>
+          <div className="settings-section-title">Ressources / Matières</div>
           {resources.length === 0 && (
             <div className="empty-state" style={{ marginBottom: 12 }}>
               Aucune ressource enregistrée.
@@ -337,7 +337,7 @@ export const Settings: React.FC = () => {
 
         {/* EXPORT / IMPORT */}
         <div className="settings-section">
-          <div className="settings-section-title">// Sauvegarde des données</div>
+          <div className="settings-section-title">Sauvegarde des données</div>
           <div className="backup-row">
             <div className="backup-card">
               <div className="backup-card-title">Exporter</div>

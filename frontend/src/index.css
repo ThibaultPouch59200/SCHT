@@ -223,7 +223,8 @@ body{background:var(--bg-page);color:var(--text-hi);font-family:var(--font);font
 .modal-btn-cancel:hover{border-color:var(--red);color:var(--red);}
 
 /* ── EMPTY STATE ── */
-.empty-state{text-align:center;padding:3rem;color:var(--text-low);font-size:14px;font-weight:500;border:1px dashed var(--border);border-radius:12px;margin:1rem 0;}
+.empty-state{text-align:center;padding:3rem;color:var(--text-low);font-size:14px;font-weight:500;border-radius:12px;margin:1rem 0;}
+.empty-icon{font-size:36px;margin-bottom:10px;}
 
 /* ── COMBOSELECT ── */
 .combo-wrap{position:relative;}
