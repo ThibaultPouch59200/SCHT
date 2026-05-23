@@ -8,7 +8,8 @@ export const NavBar: React.FC = () => {
   const missions = useMissionStore((s) => s.missions);
   const completedIds = useMissionStore((s) => s.completedIds);
   const deliveredById = useMissionStore((s) => s.deliveredById);
-  const { username, logout } = useAuthStore();
+  const username = useAuthStore((s) => s.username);
+  const logout = useAuthStore((s) => s.logout);
 
   const activeMissions = missions.filter((m) => !completedIds.includes(m.id));
   const totalScu = activeMissions.reduce(
