@@ -1,11 +1,8 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Sidebar } from './components/layout/Sidebar';
-import { Topbar } from './components/layout/Topbar';
-import { Dashboard } from './pages/Dashboard';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { NavBar } from './components/layout/NavBar';
 import { Home } from './pages/Home';
 import { Missions } from './pages/Missions';
 import { History } from './pages/History';
-import { Finance } from './pages/Finance';
 import { Info } from './pages/Info';
 import { Settings } from './pages/Settings';
 import { LoginPage } from './pages/LoginPage';
@@ -22,18 +19,18 @@ function App() {
   return (
     <BrowserRouter>
       <AppLoader />
-      <Sidebar />
-      <div className="main">
-        <Topbar />
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/operations" element={<Home />} />
-          <Route path="/missions" element={<Missions />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/finance" element={<Finance />} />
-          <Route path="/info" element={<Info />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
+      <div className="app">
+        <NavBar />
+        <div className="main">
+          <Routes>
+            <Route path="/" element={<Navigate to="/operations" replace />} />
+            <Route path="/operations" element={<Home />} />
+            <Route path="/missions" element={<Missions />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/info" element={<Info />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </div>
       </div>
     </BrowserRouter>
   );
