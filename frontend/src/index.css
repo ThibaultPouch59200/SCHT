@@ -63,11 +63,7 @@ body{background:var(--bg-page);color:var(--text-hi);font-family:var(--font);font
 .section-head::after{content:'';flex:1;height:1px;background:var(--border);}
 
 /* ── FILTER BAR ── */
-.filter-bar{display:flex;gap:8px;padding:0 0 16px;align-items:center;flex-wrap:wrap;}
-.filter-label{font-size:11px;font-weight:700;color:var(--text-low);text-transform:uppercase;letter-spacing:0.05em;margin-right:4px;}
-.filter-btn{padding:5px 16px;font-size:12px;font-family:var(--font);font-weight:600;border:1px solid var(--border);border-radius:20px;background:transparent;cursor:pointer;color:var(--text-low);transition:all 0.15s;}
-.filter-btn:hover{border-color:var(--border-accent);color:var(--accent-dark);background:var(--accent-dim);}
-.filter-btn.active{border-color:var(--border-accent);color:var(--accent-dark);background:var(--accent-dim);}
+.filter-bar{display:flex;gap:12px;padding:0 0 16px;align-items:center;flex-wrap:wrap;}
 
 /* ── PLANET GROUP ── */
 .planet-group{margin-bottom:28px;}
