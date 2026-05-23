@@ -157,7 +157,7 @@ export const Missions: React.FC = () => {
 
         {formOpen && (
           <div className="mission-form-panel">
-            <div className="form-title">// Enregistrement mission cargo</div>
+            <div className="form-title">Enregistrement mission cargo</div>
 
             {missions.filter((m) => !completedIds.includes(m.id)).length > 0 && (
               <div className="form-field" style={{ marginBottom: '12px' }}>
@@ -270,7 +270,7 @@ export const Missions: React.FC = () => {
                 </>
               );
             })()}
-            <div className="cargo-section-title">// Cargaisons — lieux de livraison</div>
+            <div className="cargo-section-title">Cargaisons — lieux de livraison</div>
             <div className="cargo-inputs">
               {cargoLines.map((line) => {
                 const destInList = locations.some((l) => l.name === line.dest);
@@ -346,9 +346,8 @@ export const Missions: React.FC = () => {
         <div className="missions-list">
           {missions.filter((m) => !completedIds.includes(m.id)).length === 0 ? (
             <div className="empty-state">
-              // NO ACTIVE MISSIONS
-              <br />
-              Crée une nouvelle mission ou consulte l'historique.
+              <div className="empty-icon">🚚</div>
+              Aucune mission active.<br />Crée une nouvelle mission ou consulte l'historique.
             </div>
           ) : (
             missions.filter((m) => !completedIds.includes(m.id)).map((m) => {

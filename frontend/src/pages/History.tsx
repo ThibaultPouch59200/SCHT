@@ -95,9 +95,8 @@ export const History: React.FC = () => {
         <div className="missions-list">
           {completed.length === 0 ? (
             <div className="empty-state">
-              // NO COMPLETED MISSIONS
-              <br />
-              Les missions livrées apparaîtront ici.
+              <div className="empty-icon">📜</div>
+              Aucune mission terminée.<br />Les missions livrées apparaîtront ici.
             </div>
           ) : (
             completed.map((m) => {
@@ -167,7 +166,7 @@ export const History: React.FC = () => {
 
                   {isReplaying && (
                     <div className="replay-panel">
-                      <div className="replay-panel-title">// Nouvelle run — ajuste les SCU si besoin</div>
+                      <div className="replay-panel-title">Nouvelle run — ajuste les SCU si besoin</div>
                       <div className="replay-lines">
                         {replayLines.map((line) => (
                           <div key={line.id} className="replay-line">
