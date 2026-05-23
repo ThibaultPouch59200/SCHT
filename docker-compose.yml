@@ -39,7 +39,7 @@ services:
         VITE_API_URL: ${VITE_API_URL:-}
     container_name: scht
     ports:
-      - "3002:80"
+      - "3005:80"
     depends_on:
       - backend
     restart: unless-stopped
