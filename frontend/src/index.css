@@ -63,7 +63,7 @@ body{background:var(--bg-page);color:var(--text-hi);font-family:var(--font);font
 .section-head::after{content:'';flex:1;height:1px;background:var(--border);}
 
 /* ── FILTER BAR ── */
-.filter-bar{display:flex;gap:12px;padding:0 0 16px;align-items:center;flex-wrap:wrap;}
+.filter-bar{display:flex;gap:12px;padding:16px 24px 0;align-items:center;flex-wrap:wrap;}
 
 /* ── PLANET GROUP ── */
 .planet-group{margin-bottom:28px;}
