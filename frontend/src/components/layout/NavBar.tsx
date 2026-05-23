@@ -1,8 +1,9 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Truck, Package, Clock, Settings, HelpCircle, LogOut } from 'lucide-react';
+import { Truck, Package, Clock, Settings, HelpCircle, LogOut, Sun, Moon } from 'lucide-react';
 import { useMissionStore } from '../../store/useMissionStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useTheme } from '../../hooks/useTheme';
 
 export const NavBar: React.FC = () => {
   const missions = useMissionStore((s) => s.missions);
@@ -10,6 +11,7 @@ export const NavBar: React.FC = () => {
   const deliveredById = useMissionStore((s) => s.deliveredById);
   const username = useAuthStore((s) => s.username);
   const logout = useAuthStore((s) => s.logout);
+  const { dark, toggle } = useTheme();
 
   const activeMissions = missions.filter((m) => !completedIds.includes(m.id));
   const totalScu = activeMissions.reduce(
@@ -78,7 +80,10 @@ export const NavBar: React.FC = () => {
           <strong>{totalScu}</strong> SCU en transit
         </span>
         <span className="topbar-user">{username}</span>
-        <button className="navbar-logout" onClick={logout} title="Se déconnecter">
+        <button className="navbar-icon-btn" onClick={toggle} title={dark ? 'Mode clair' : 'Mode sombre'}>
+          {dark ? <Sun size={15} /> : <Moon size={15} />}
+        </button>
+        <button className="navbar-icon-btn navbar-logout" onClick={logout} title="Se déconnecter">
           <LogOut size={15} />
         </button>
       </div>
