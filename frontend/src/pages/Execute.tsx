@@ -44,11 +44,11 @@ export function Execute({ contractId, onBack }: Props) {
 
   const handleCheckAll = async (stopIdx: number, allDone: boolean) => {
     const s = stops[stopIdx];
-    for (const item of s.items) {
-      if (item.done !== !allDone) {
-        await toggleItem(contractId, s.id, item.id);
-      }
-    }
+    await Promise.all(
+      s.items
+        .filter((item) => item.done !== !allDone)
+        .map((item) => toggleItem(contractId, s.id, item.id))
+    );
   };
 
   const handleComplete = async () => {

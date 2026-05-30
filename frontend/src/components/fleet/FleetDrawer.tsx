@@ -22,7 +22,7 @@ export function FleetDrawer({ onClose }: Props) {
       name: draft.name,
       model: draft.model,
       pilot: draft.pilot,
-      scu: parseInt(draft.scu) || 0,
+      scu: parseInt(draft.scu, 10) || 0,
     });
     setDraft({ name: '', model: '', pilot: '', scu: '' });
     setAdding(false);

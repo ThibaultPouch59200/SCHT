@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useContractStore } from '../store/useContractStore';
 import { useFleetStore } from '../store/useFleetStore';
 
@@ -41,7 +41,25 @@ export function Setup({ contractId, onBack, onExecute }: Props) {
       items: s.items.map((it) => ({ key: nextKey(), material: it.material, qty: it.qty })),
     })) ?? []
   );
-  const isNew = !contract || contract.name === 'UNTITLED CONTRACT';
+  const isNew = !contract || (contract.status === 'PENDING' && contract.name === 'UNTITLED CONTRACT');
+  const [discardConfirm, setDiscardConfirm] = useState(false);
+
+  const synced = useRef(false);
+  useEffect(() => {
+    if (contract && !synced.current) {
+      setName(contract.name);
+      setClient(contract.client);
+      setPayout(String(contract.payout));
+      setShipIds(contract.ships.map((s) => s.id));
+      setStops(contract.stops.map((s) => ({
+        key: nextKey(),
+        type: s.type as 'PICKUP' | 'DELIVERY',
+        station: s.station,
+        items: s.items.map((it) => ({ key: nextKey(), material: it.material, qty: it.qty })),
+      })));
+      synced.current = true;
+    }
+  }, [contract]);
 
   useEffect(() => { loadShips(); }, [loadShips]);
 
@@ -101,7 +119,7 @@ export function Setup({ contractId, onBack, onExecute }: Props) {
   const handleSave = async () => {
     if (!contractId) return;
     await saveContract(contractId, {
-      name, client, payout: parseInt(payout) || 0,
+      name, client, payout: parseInt(payout, 10) || 0,
       shipIds, stops: buildStops(),
     });
   };
@@ -114,7 +132,7 @@ export function Setup({ contractId, onBack, onExecute }: Props) {
   const handleCommit = async () => {
     if (!contractId) return;
     await saveContract(contractId, {
-      name, client, payout: parseInt(payout) || 0,
+      name, client, payout: parseInt(payout, 10) || 0,
       status: 'IN_PROGRESS', shipIds, stops: buildStops(),
     });
     onExecute(contractId);
@@ -155,7 +173,7 @@ export function Setup({ contractId, onBack, onExecute }: Props) {
                 className="input input--sm input--num"
                 type="number" min={0}
                 value={item.qty}
-                onChange={(e) => updateItem(stop.key, item.key, { qty: parseInt(e.target.value) || 0 })}
+                onChange={(e) => updateItem(stop.key, item.key, { qty: parseInt(e.target.value, 10) || 0 })}
               />
               <div className="unit">SCU</div>
               <button className="icon-btn" onClick={() => removeItem(stop.key, item.key)}>−</button>
@@ -185,9 +203,19 @@ export function Setup({ contractId, onBack, onExecute }: Props) {
           <h1 className="page-head__title">Configure Contract</h1>
         </div>
         <div className="page-head__actions">
-          <button className="btn btn--ghost" onClick={handleDiscard}>◂ DISCARD</button>
-          <button className="btn" onClick={handleSave}>SAVE DRAFT</button>
-          <button className="btn btn--cyan" onClick={handleCommit}>▸ COMMIT &amp; EXECUTE</button>
+          {discardConfirm ? (
+            <>
+              <span className="muted" style={{ fontSize: 11, letterSpacing: '0.15em' }}>Discard this contract?</span>
+              <button className="btn btn--ghost" onClick={() => setDiscardConfirm(false)}>CANCEL</button>
+              <button className="btn" onClick={handleDiscard}>CONFIRM DISCARD</button>
+            </>
+          ) : (
+            <>
+              <button className="btn btn--ghost" onClick={isNew ? () => setDiscardConfirm(true) : onBack}>◂ DISCARD</button>
+              <button className="btn" onClick={handleSave}>SAVE DRAFT</button>
+              <button className="btn btn--cyan" onClick={handleCommit}>▸ COMMIT &amp; EXECUTE</button>
+            </>
+          )}
         </div>
       </div>
 

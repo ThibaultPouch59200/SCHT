@@ -4,6 +4,7 @@ import { Setup } from './pages/Setup';
 import { Execute } from './pages/Execute';
 import { FleetDrawer } from './components/fleet/FleetDrawer';
 import { useContractStore } from './store/useContractStore';
+import { useAuthStore } from './store/useAuthStore';
 
 type View = 'BOARD' | 'SETUP' | 'EXEC';
 
@@ -12,6 +13,7 @@ export function AppShell() {
   const [activeContractId, setActiveContractId] = useState<number | null>(null);
   const [fleetOpen, setFleetOpen] = useState(false);
   const { loadContracts } = useContractStore();
+  const { logout } = useAuthStore();
 
   useEffect(() => {
     loadContracts();
@@ -58,7 +60,11 @@ export function AppShell() {
               <button
                 key={n.id}
                 className={'nav-btn ' + (view === n.id ? 'is-active' : '')}
-                onClick={() => setView(n.id)}
+                onClick={() => {
+                  if ((n.id === 'SETUP' || n.id === 'EXEC') && activeContractId === null) return;
+                  setView(n.id);
+                }}
+                disabled={(n.id === 'SETUP' || n.id === 'EXEC') && activeContractId === null}
               >
                 {n.label}
               </button>
@@ -68,6 +74,9 @@ export function AppShell() {
           <div className="chrome-top__status">
             <button className="btn btn--sm btn--ghost" onClick={() => setFleetOpen(true)}>
               FLEET ROSTER
+            </button>
+            <button className="btn btn--sm btn--ghost" onClick={logout}>
+              LOGOUT
             </button>
           </div>
         </div>
