@@ -2,24 +2,18 @@ import { useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 
 export function LoginPage() {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [isRegister, setIsRegister] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const { login, register, loading, error, clearError } = useAuthStore();
+  const { login, register, loading, error } = useAuthStore();
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (mode === 'login') {
-      login(username, password);
-    } else {
+  function handleSubmit() {
+    if (isRegister) {
       register(username, password);
+    } else {
+      login(username, password);
     }
-  }
-
-  function switchMode() {
-    clearError();
-    setMode((m) => (m === 'login' ? 'register' : 'login'));
   }
 
   return (
@@ -27,58 +21,39 @@ export function LoginPage() {
       <div className="login-card">
         <div className="login-logo">
           <span className="login-logo-text">SCHT</span>
-          <span className="login-logo-sub">SC Hauling Tracker</span>
+          <span className="login-logo-sub">Hauling Ops Terminal</span>
         </div>
-
-        <form onSubmit={handleSubmit} className="login-form">
-          <h2 className="login-title">
-            {mode === 'login' ? 'Connexion' : 'Créer un compte'}
-          </h2>
-
-          {error && (
-            <div className="login-error" role="alert">
-              {error}
-            </div>
-          )}
-
+        <div className="login-form">
+          <div className="login-title">{isRegister ? 'CREATE ACCOUNT' : 'AUTHENTICATE'}</div>
+          {error && <div className="login-error">{error}</div>}
           <div className="login-field">
-            <label htmlFor="username">Identifiant</label>
+            <label>Username</label>
             <input
-              id="username"
               type="text"
-              autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              disabled={loading}
-              required
+              onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
               autoFocus
             />
           </div>
-
           <div className="login-field">
-            <label htmlFor="password">Mot de passe</label>
+            <label>Password</label>
             <input
-              id="password"
               type="password"
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-              required
-              minLength={6}
+              onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
             />
           </div>
-
-          <button type="submit" className="btn-primary login-submit" disabled={loading}>
-            {loading ? 'Chargement…' : mode === 'login' ? 'Se connecter' : "S'inscrire"}
+          <div className="login-submit">
+            <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
+              {loading ? '…' : isRegister ? 'CREATE ACCOUNT' : 'LOGIN'}
+            </button>
+          </div>
+          <button className="login-switch" onClick={() => setIsRegister((v) => !v)}>
+            {isRegister ? 'ALREADY HAVE AN ACCOUNT?' : 'CREATE ACCOUNT'}
           </button>
-        </form>
-
-        <button className="login-switch" onClick={switchMode} disabled={loading}>
-          {mode === 'login'
-            ? "Pas encore de compte ? S'inscrire"
-            : 'Déjà un compte ? Se connecter'}
-        </button>
+        </div>
       </div>
     </div>
   );
