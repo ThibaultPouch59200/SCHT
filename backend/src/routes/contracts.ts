@@ -64,7 +64,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
 
 // GET /api/contracts/:id
 router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
-  const id = parseInt(String(req.params['id']));
+  const id = parseInt(String(req.params['id']), 10);
   if (isNaN(id)) { res.status(400).json({ error: 'Invalid id' }); return; }
   const contract = await prisma.contract.findFirst({
     where: { id, userId: req.userId },
@@ -83,7 +83,7 @@ type StopInput = {
 
 // PATCH /api/contracts/:id
 router.patch('/:id', authenticate, async (req: AuthRequest, res: Response) => {
-  const id = parseInt(String(req.params['id']));
+  const id = parseInt(String(req.params['id']), 10);
   if (isNaN(id)) { res.status(400).json({ error: 'Invalid id' }); return; }
   const existing = await prisma.contract.findFirst({ where: { id, userId: req.userId } });
   if (!existing) { res.status(404).json({ error: 'Not found' }); return; }
@@ -118,23 +118,60 @@ router.patch('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     }
 
     if (stops !== undefined) {
-      await tx.contractStop.deleteMany({ where: { contractId: id } });
+      const existingStops = await tx.contractStop.findMany({
+        where: { contractId: id },
+        include: { items: { orderBy: { id: 'asc' } } },
+      });
+
+      const newPositions = new Set(stops.map((s) => s.position));
+      const stopsToDelete = existingStops.filter((s) => !newPositions.has(s.position));
+      if (stopsToDelete.length > 0) {
+        await tx.contractStop.deleteMany({ where: { id: { in: stopsToDelete.map((s) => s.id) } } });
+      }
+
       for (const stop of stops) {
-        await tx.contractStop.create({
-          data: {
-            contractId: id,
-            type: stop.type,
-            station: stop.station,
-            position: stop.position,
-            items: {
-              create: stop.items.map((it) => ({
-                material: it.material,
-                qty: it.qty,
-                done: it.done ?? false,
-              })),
+        const existingStop = existingStops.find((s) => s.position === stop.position);
+        if (existingStop) {
+          await tx.contractStop.update({
+            where: { id: existingStop.id },
+            data: { type: stop.type, station: stop.station },
+          });
+          const existingItems = existingStop.items;
+          for (let i = 0; i < stop.items.length; i++) {
+            const newItem = stop.items[i]!;
+            const existingItem = existingItems[i];
+            if (existingItem) {
+              await tx.stopItem.update({
+                where: { id: existingItem.id },
+                data: {
+                  material: newItem.material,
+                  qty: newItem.qty,
+                  done: newItem.done !== undefined ? newItem.done : existingItem.done,
+                },
+              });
+            } else {
+              await tx.stopItem.create({
+                data: { stopId: existingStop.id, material: newItem.material, qty: newItem.qty, done: newItem.done ?? false },
+              });
+            }
+          }
+          if (existingItems.length > stop.items.length) {
+            const surplus = existingItems.slice(stop.items.length);
+            await tx.stopItem.deleteMany({ where: { id: { in: surplus.map((i) => i.id) } } });
+          }
+        } else {
+          await tx.contractStop.create({
+            data: {
+              contractId: id,
+              type: stop.type,
+              station: stop.station,
+              position: stop.position,
+              items: {
+                create: stop.items.map((it) => ({ material: it.material, qty: it.qty, done: it.done ?? false })),
+              },
             },
-          },
-        });
+          });
+        }
       }
     }
   });
@@ -145,7 +182,7 @@ router.patch('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 
 // DELETE /api/contracts/:id
 router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
-  const id = parseInt(String(req.params['id']));
+  const id = parseInt(String(req.params['id']), 10);
   if (isNaN(id)) { res.status(400).json({ error: 'Invalid id' }); return; }
   const existing = await prisma.contract.findFirst({ where: { id, userId: req.userId } });
   if (!existing) { res.status(404).json({ error: 'Not found' }); return; }
@@ -158,9 +195,9 @@ router.patch(
   '/:id/stops/:stopId/items/:itemId/toggle',
   authenticate,
   async (req: AuthRequest, res: Response) => {
-    const contractId = parseInt(String(req.params['id']));
-    const stopId = parseInt(String(req.params['stopId']));
-    const itemId = parseInt(String(req.params['itemId']));
+    const contractId = parseInt(String(req.params['id']), 10);
+    const stopId = parseInt(String(req.params['stopId']), 10);
+    const itemId = parseInt(String(req.params['itemId']), 10);
     if (isNaN(contractId)) { res.status(400).json({ error: 'Invalid id' }); return; }
     if (isNaN(stopId)) { res.status(400).json({ error: 'Invalid id' }); return; }
     if (isNaN(itemId)) { res.status(400).json({ error: 'Invalid id' }); return; }
@@ -174,8 +211,11 @@ router.patch(
     await prisma.stopItem.update({ where: { id: itemId }, data: { done: !item.done } });
 
     const allItems = await prisma.stopItem.findMany({ where: { stop: { contractId } } });
-    if (allItems.length > 0 && allItems.every((i) => i.done) && contract.status !== 'COMPLETED') {
+    const allDone = allItems.length > 0 && allItems.every((i) => i.done);
+    if (allDone && contract.status !== 'COMPLETED') {
       await prisma.contract.update({ where: { id: contractId }, data: { status: 'COMPLETED' } });
+    } else if (!allDone && contract.status === 'COMPLETED') {
+      await prisma.contract.update({ where: { id: contractId }, data: { status: 'IN_PROGRESS' } });
     }
 
     const updated = await prisma.contract.findFirstOrThrow({ where: { id: contractId }, include: CONTRACT_INCLUDE });
