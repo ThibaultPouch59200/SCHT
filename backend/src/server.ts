@@ -1,11 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import authRouter from './routes/auth';
-import locationsRouter from './routes/locations';
-import resourcesRouter from './routes/resources';
-import missionsRouter from './routes/missions';
-import financeRouter from './routes/finance';
 import shipsRouter from './routes/ships';
+import contractsRouter from './routes/contracts';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -17,11 +14,8 @@ app.use(cors({
 app.use(express.json());
 
 app.use('/api/auth', authRouter);
-app.use('/api/locations', locationsRouter);
-app.use('/api/resources', resourcesRouter);
-app.use('/api/missions', missionsRouter);
-app.use('/api/finance', financeRouter);
 app.use('/api/ships', shipsRouter);
+app.use('/api/contracts', contractsRouter);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
