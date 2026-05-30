@@ -97,6 +97,14 @@ router.patch('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     stops?: StopInput[];
   };
 
+  const VALID_STATUS = ['PENDING', 'IN_PROGRESS', 'COMPLETED'];
+  if (status !== undefined && !VALID_STATUS.includes(status)) {
+    res.status(400).json({ error: 'Invalid status' }); return;
+  }
+  if (stops !== undefined && stops.some((s) => !['PICKUP', 'DELIVERY'].includes(s.type))) {
+    res.status(400).json({ error: 'Invalid stop type' }); return;
+  }
+
   await prisma.$transaction(async (tx) => {
     await tx.contract.update({
       where: { id },
