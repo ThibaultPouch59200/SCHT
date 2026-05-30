@@ -65,6 +65,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
 // GET /api/contracts/:id
 router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   const id = parseInt(String(req.params['id']));
+  if (isNaN(id)) { res.status(400).json({ error: 'Invalid id' }); return; }
   const contract = await prisma.contract.findFirst({
     where: { id, userId: req.userId },
     include: CONTRACT_INCLUDE,
@@ -83,6 +84,7 @@ type StopInput = {
 // PATCH /api/contracts/:id
 router.patch('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   const id = parseInt(String(req.params['id']));
+  if (isNaN(id)) { res.status(400).json({ error: 'Invalid id' }); return; }
   const existing = await prisma.contract.findFirst({ where: { id, userId: req.userId } });
   if (!existing) { res.status(404).json({ error: 'Not found' }); return; }
 
@@ -137,13 +139,14 @@ router.patch('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     }
   });
 
-  const updated = await prisma.contract.findFirst({ where: { id }, include: CONTRACT_INCLUDE });
+  const updated = await prisma.contract.findFirstOrThrow({ where: { id }, include: CONTRACT_INCLUDE });
   res.json(serializeContract(updated));
 });
 
 // DELETE /api/contracts/:id
 router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   const id = parseInt(String(req.params['id']));
+  if (isNaN(id)) { res.status(400).json({ error: 'Invalid id' }); return; }
   const existing = await prisma.contract.findFirst({ where: { id, userId: req.userId } });
   if (!existing) { res.status(404).json({ error: 'Not found' }); return; }
   await prisma.contract.delete({ where: { id } });
@@ -158,6 +161,9 @@ router.patch(
     const contractId = parseInt(String(req.params['id']));
     const stopId = parseInt(String(req.params['stopId']));
     const itemId = parseInt(String(req.params['itemId']));
+    if (isNaN(contractId)) { res.status(400).json({ error: 'Invalid id' }); return; }
+    if (isNaN(stopId)) { res.status(400).json({ error: 'Invalid id' }); return; }
+    if (isNaN(itemId)) { res.status(400).json({ error: 'Invalid id' }); return; }
 
     const contract = await prisma.contract.findFirst({ where: { id: contractId, userId: req.userId } });
     if (!contract) { res.status(404).json({ error: 'Not found' }); return; }
@@ -172,7 +178,7 @@ router.patch(
       await prisma.contract.update({ where: { id: contractId }, data: { status: 'COMPLETED' } });
     }
 
-    const updated = await prisma.contract.findFirst({ where: { id: contractId }, include: CONTRACT_INCLUDE });
+    const updated = await prisma.contract.findFirstOrThrow({ where: { id: contractId }, include: CONTRACT_INCLUDE });
     res.json(serializeContract(updated));
   }
 );
