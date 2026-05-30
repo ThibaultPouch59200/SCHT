@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 
 export function LoginPage() {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [isRegister, setIsRegister] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -10,16 +10,16 @@ export function LoginPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (mode === 'login') {
-      login(username, password);
-    } else {
+    if (isRegister) {
       register(username, password);
+    } else {
+      login(username, password);
     }
   }
 
   function switchMode() {
     clearError();
-    setMode((m) => (m === 'login' ? 'register' : 'login'));
+    setIsRegister((v) => !v);
   }
 
   return (
@@ -27,57 +27,45 @@ export function LoginPage() {
       <div className="login-card">
         <div className="login-logo">
           <span className="login-logo-text">SCHT</span>
-          <span className="login-logo-sub">SC Hauling Tracker</span>
+          <span className="login-logo-sub">Hauling Ops Terminal</span>
         </div>
-
-        <form onSubmit={handleSubmit} className="login-form">
-          <h2 className="login-title">
-            {mode === 'login' ? 'Connexion' : 'Créer un compte'}
-          </h2>
-
-          {error && (
-            <div className="login-error" role="alert">
-              {error}
-            </div>
-          )}
-
+        <form className="login-form" onSubmit={handleSubmit}>
+          <div className="login-title">{isRegister ? 'CREATE ACCOUNT' : 'AUTHENTICATE'}</div>
+          {error && <div className="login-error" role="alert">{error}</div>}
           <div className="login-field">
-            <label htmlFor="username">Identifiant</label>
+            <label htmlFor="username">Username</label>
             <input
               id="username"
               type="text"
               autoComplete="username"
+              required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               disabled={loading}
-              required
               autoFocus
             />
           </div>
-
           <div className="login-field">
-            <label htmlFor="password">Mot de passe</label>
+            <label htmlFor="password">Password</label>
             <input
               id="password"
               type="password"
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              autoComplete={isRegister ? 'new-password' : 'current-password'}
+              required
+              minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
-              required
-              minLength={6}
             />
           </div>
-
-          <button type="submit" className="btn-primary login-submit" disabled={loading}>
-            {loading ? 'Chargement…' : mode === 'login' ? 'Se connecter' : "S'inscrire"}
-          </button>
+          <div className="login-submit">
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? '…' : isRegister ? 'CREATE ACCOUNT' : 'LOGIN'}
+            </button>
+          </div>
         </form>
-
-        <button className="login-switch" onClick={switchMode} disabled={loading}>
-          {mode === 'login'
-            ? "Pas encore de compte ? S'inscrire"
-            : 'Déjà un compte ? Se connecter'}
+        <button type="button" className="login-switch" onClick={switchMode}>
+          {isRegister ? 'ALREADY HAVE AN ACCOUNT?' : 'CREATE ACCOUNT'}
         </button>
       </div>
     </div>

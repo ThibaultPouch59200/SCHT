@@ -1,13 +1,12 @@
+import type { Contract, FleetShip, ContractPatch } from '../types';
+
 const BASE = import.meta.env.VITE_API_URL ?? '';
 
 function getToken(): string | null {
   return localStorage.getItem('scht-token');
 }
 
-async function request<T>(
-  path: string,
-  options: RequestInit = {}
-): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -31,8 +30,6 @@ export class ApiError extends Error {
   }
 }
 
-// ── Auth ────────────────────────────────────────────────────────────────────
-
 export const api = {
   auth: {
     login: (username: string, password: string) =>
@@ -45,151 +42,32 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ username, password }),
       }),
-    me: () =>
-      request<{
-        id: number;
-        username: string;
-        selectedShip?: { id: number; name: string; manufacturer: string; scu: number; category: string } | null;
-      }>('/api/auth/me'),
   },
 
-  // ── Locations ─────────────────────────────────────────────────────────
-  locations: {
-    list: () =>
-      request<{ id: number; name: string; planet: string; system: string }[]>(
-        '/api/locations'
-      ),
-    create: (data: { name: string; planet: string; system: string }) =>
-      request<{ id: number; name: string; planet: string; system: string }>(
-        '/api/locations',
-        {
-          method: 'POST',
-          body: JSON.stringify(data),
-        }
-      ),
-    remove: (name: string, system: string) =>
-      request<{ ok: boolean }>(
-        `/api/locations?name=${encodeURIComponent(name)}&system=${encodeURIComponent(system)}`,
-        { method: 'DELETE' }
-      ),
-  },
-
-  // ── Resources ─────────────────────────────────────────────────────────
-  resources: {
-    list: () => request<{ id: number; name: string }[]>('/api/resources'),
-    create: (name: string) =>
-      request<{ id: number; name: string }>('/api/resources', {
-        method: 'POST',
-        body: JSON.stringify({ name }),
+  contracts: {
+    list: () => request<Contract[]>('/api/contracts'),
+    create: () =>
+      request<Contract>('/api/contracts', { method: 'POST' }),
+    get: (id: number) => request<Contract>(`/api/contracts/${id}`),
+    update: (id: number, patch: ContractPatch) =>
+      request<Contract>(`/api/contracts/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(patch),
       }),
-    remove: (name: string) =>
-      request<{ ok: boolean }>(`/api/resources/${encodeURIComponent(name)}`, {
-        method: 'DELETE',
-      }),
-  },
-
-  // ── Missions ──────────────────────────────────────────────────────────
-  missions: {
-    list: () => request<SerializedMission[]>('/api/missions'),
-
-    create: (data: {
-      origin: string;
-      system: string;
-      pay: number;
-      cargos: { res: string; scu: number; dest: string; planet: string }[];
-    }) =>
-      request<SerializedMission>('/api/missions', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }),
-
     delete: (id: number) =>
-      request<{ ok: boolean }>(`/api/missions/${id}`, { method: 'DELETE' }),
-
-    setDelivered: (missionId: number, cargoId: number, amount: number) =>
-      request<SerializedMission>(
-        `/api/missions/${missionId}/cargo/${cargoId}/delivered`,
-        { method: 'PATCH', body: JSON.stringify({ amount }) }
+      request<{ ok: boolean }>(`/api/contracts/${id}`, { method: 'DELETE' }),
+    toggleItem: (contractId: number, stopId: number, itemId: number) =>
+      request<Contract>(
+        `/api/contracts/${contractId}/stops/${stopId}/items/${itemId}/toggle`,
+        { method: 'PATCH' }
       ),
-
-    confirmStation: (missionId: number, stationName: string) =>
-      request<SerializedMission>(
-        `/api/missions/${missionId}/stations/${encodeURIComponent(stationName)}/confirm`,
-        { method: 'POST' }
-      ),
-
-    copy: (id: number) =>
-      request<SerializedMission>(`/api/missions/${id}/copy`, { method: 'POST' }),
   },
 
-  // ── Ships ─────────────────────────────────────────────────────────────
   ships: {
-    list: () =>
-      request<{ id: number; name: string; manufacturer: string; scu: number; category: string }[]>(
-        '/api/ships'
-      ),
-    selectShip: (shipId: number) =>
-      request<{ selectedShip: { id: number; name: string; manufacturer: string; scu: number; category: string } | null }>(
-        '/api/auth/me/ship',
-        { method: 'PUT', body: JSON.stringify({ shipId }) }
-      ),
-  },
-
-  // ── Finance ───────────────────────────────────────────────────────────
-  finance: {
-    get: () =>
-      request<{ wallet: number; transactions: SerializedTransaction[] }>(
-        '/api/finance'
-      ),
-    setWallet: (amount: number) =>
-      request<{ wallet: number; transactions: SerializedTransaction[] }>(
-        '/api/finance/wallet',
-        { method: 'PUT', body: JSON.stringify({ amount }) }
-      ),
-    addTransaction: (data: {
-      amount: number;
-      desc: string;
-      type: string;
-      missionId?: number;
-    }) =>
-      request<SerializedTransaction>('/api/finance/transactions', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }),
-    deleteTransaction: (id: number) =>
-      request<{ ok: boolean }>(`/api/finance/transactions/${id}`, {
-        method: 'DELETE',
-      }),
+    list: () => request<FleetShip[]>('/api/ships'),
+    create: (data: { name: string; model: string; pilot: string; scu: number }) =>
+      request<FleetShip>('/api/ships', { method: 'POST', body: JSON.stringify(data) }),
+    remove: (id: number) =>
+      request<{ ok: boolean }>(`/api/ships/${id}`, { method: 'DELETE' }),
   },
 };
-
-// ── Shared types (mirror backend serialization) ──────────────────────────────
-
-export interface SerializedCargoLine {
-  id: number;
-  res: string;
-  scu: number;
-  dest: string;
-  planet: string;
-  delivered: number;
-  confirmed: boolean;
-}
-
-export interface SerializedMission {
-  id: number;
-  origin: string;
-  system: string;
-  pay: number;
-  createdAt: string;
-  completedAt: string | null;
-  cargos: SerializedCargoLine[];
-}
-
-export interface SerializedTransaction {
-  id: number;
-  date: string;
-  desc: string;
-  amount: number;
-  type: string;
-  missionId?: number | null;
-}

@@ -1,33 +1,49 @@
-export interface Ship {
-  id: number
-  name: string
-  manufacturer: string
-  scu: number
-  category: string
+export interface StopItem {
+  id: number;
+  material: string;
+  qty: number;
+  done: boolean;
 }
 
-export interface CargoLine {
-  id?: number;  // present when fetched from API
-  res: string;
+export interface ContractStop {
+  id: number;
+  type: 'PICKUP' | 'DELIVERY';
+  station: string;
+  position: number;
+  items: StopItem[];
+}
+
+export interface FleetShip {
+  id: number;
+  name: string;
+  model: string;
+  pilot: string;
   scu: number;
-  dest: string;
-  planet: string;
 }
 
-export interface Mission {
+export interface Contract {
   id: number;
-  origin: string;
-  system: string;
-  pay: number;
-  cargos: CargoLine[];
+  name: string;
+  client: string;
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  payout: number;
   createdAt: string;
+  ships: FleetShip[];
+  stops: ContractStop[];
 }
 
-export interface Transaction {
-  id: number;
-  date: string;
-  desc: string;
-  amount: number;
-  type: 'mission' | 'wallet';
-  missionId?: number;
-}
+export type StopInput = {
+  type: string;
+  station: string;
+  position: number;
+  items: { material: string; qty: number; done?: boolean }[];
+};
+
+export type ContractPatch = {
+  name?: string;
+  client?: string;
+  payout?: number;
+  status?: string;
+  shipIds?: number[];
+  stops?: StopInput[];
+};
