@@ -16,15 +16,18 @@ model User {
   createdAt    DateTime      @default(now())
   contracts    Contract[]
   transactions Transaction[]
+  ships        Ship[]
 }
 
 model Ship {
-  id       Int            @id @default(autoincrement())
-  name     String
-  model    String         @default("")
-  pilot    String         @default("")
-  scu      Int
-  ships    ContractShip[]
+  id            Int            @id @default(autoincrement())
+  name          String
+  model         String         @default("")
+  pilot         String         @default("")
+  scu           Int
+  userId        Int?
+  user          User?          @relation(fields: [userId], references: [id])
+  contractLinks ContractShip[]
 }
 
 model Contract {
@@ -63,7 +66,7 @@ model ContractShip {
   contractId Int
   shipId     Int
   contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
-  ship       Ship     @relation(fields: [shipId], references: [id])
+  ship       Ship     @relation(fields: [shipId], references: [id], onDelete: Cascade)
 
   @@id([contractId, shipId])
 }
