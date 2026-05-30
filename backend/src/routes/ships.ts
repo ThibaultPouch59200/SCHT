@@ -19,8 +19,8 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
     pilot?: string;
     scu: number;
   };
-  if (!name || scu == null) {
-    res.status(400).json({ error: 'name and scu required' });
+  if (!name || typeof scu !== 'number' || scu <= 0) {
+    res.status(400).json({ error: 'name and scu (positive number) required' });
     return;
   }
   const ship = await prisma.ship.create({

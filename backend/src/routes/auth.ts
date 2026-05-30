@@ -49,6 +49,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
 // GET /api/auth/me
 router.get('/me', authenticate, async (req: AuthRequest, res: Response) => {
+  if (!req.userId) { res.status(401).json({ error: 'Unauthorized' }); return; }
   const user = await prisma.user.findFirst({ where: { id: req.userId } });
   if (!user) { res.status(404).json({ error: 'Not found' }); return; }
   res.json({ id: user.id, username: user.username });
