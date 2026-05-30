@@ -9,13 +9,11 @@ datasource db {
 }
 
 model User {
-  id           Int           @id @default(autoincrement())
-  username     String        @unique
+  id           Int        @id @default(autoincrement())
+  username     String     @unique
   passwordHash String
-  wallet       Int           @default(0)
-  createdAt    DateTime      @default(now())
+  createdAt    DateTime   @default(now())
   contracts    Contract[]
-  transactions Transaction[]
   ships        Ship[]
 }
 
@@ -71,13 +69,3 @@ model ContractShip {
   @@id([contractId, shipId])
 }
 
-model Transaction {
-  id        Int    @id @default(autoincrement())
-  userId    Int
-  date      String
-  desc      String
-  amount    Int
-  type      String
-  missionId Int?
-  user      User   @relation(fields: [userId], references: [id])
-}
