@@ -6,7 +6,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 const NAV_ITEMS = [
   { to: '/operations', label: 'Route' },
   { to: '/missions', label: 'Missions' },
-  { to: '/history', label: 'Journal' },
+  { to: '/dashboard', label: 'Dashboard' },
   { to: '/settings', label: 'Réglages' },
 ];
 
