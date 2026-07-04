@@ -1,0 +1,112 @@
+/* ═══════════════════════════════════════════════════════════════
+   CARGO TERMINAL — design tokens + shared component classes
+   Dark industrial spaceport-freight visual identity.
+   Ported 1:1 from the validated mockups:
+   - route-directions.html (.ta-* / Direction A)
+   - mission-terminal.html (.ta2-*)
+   Class names renamed to app-level `.ct-*`.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --ink:#0e1116; --panel:#161b22; --panel-2:#1c222c; --edge:#2a323f;
+  --amber:#f2a83b; --steel:#6ea8bf; --ok:#7bb366; --halt:#e06b5c;
+  --txt:#e6e9ee; --dim:#8b94a3; --faint:#565f6e;
+  --font-display:'Oswald',sans-serif; --font-mono:'JetBrains Mono',monospace; --font-body:'Barlow',sans-serif;
+}
+
+html,body,#root { background:var(--ink); color:var(--txt); font-family:var(--font-body); }
+
+/* ── TERMINAL FRAME (outer panel) ── */
+.ct-terminal{background:var(--ink);border:1px solid var(--edge);border-radius:4px;overflow:hidden;font-family:var(--font-body);color:var(--txt);}
+.ct-terminal.narrow{max-width:760px;margin:0 auto;}
+
+/* ── TOPBAR / BRAND / NAV ── */
+.ct-topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--edge);}
+.ct-brand{font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:.16em;text-transform:uppercase;}
+.ct-brand b{color:var(--amber);}
+.ct-nav{display:flex;gap:2px;font-family:var(--font-display);font-size:12px;letter-spacing:.08em;text-transform:uppercase;}
+.ct-nav span{padding:5px 11px;color:var(--dim);}
+.ct-nav span.on{color:var(--ink);background:var(--amber);}
+
+/* ── AUTO TOGGLE SWITCH ── */
+.ct-toggle{font-family:var(--font-mono);font-size:10px;color:var(--dim);display:flex;gap:6px;align-items:center;letter-spacing:.05em;}
+.ct-switch{width:30px;height:15px;background:var(--amber);position:relative;border-radius:1px;}
+.ct-switch::after{content:"";position:absolute;right:2px;top:2px;width:11px;height:11px;background:var(--ink);}
+
+/* ── GAUGE (cargo hold meter) ── */
+.ct-gauge{display:flex;align-items:center;gap:12px;padding:9px 16px;background:var(--panel-2);border-bottom:1px solid var(--edge);font-family:var(--font-mono);}
+.ct-gauge.boxed{padding:9px 12px;border:1px solid var(--edge);border-bottom:1px solid var(--edge);margin-bottom:16px;}
+.ct-gauge .lbl{font-size:10px;letter-spacing:.12em;color:var(--faint);}
+.ct-gauge .val{font-size:13px;font-weight:700;color:var(--amber);}
+.ct-gauge.boxed .val{font-size:12px;}
+.ct-cells{display:flex;gap:2px;flex:1;}
+.ct-cell{height:9px;flex:1;background:var(--edge);}
+.ct-cell.f{background:var(--amber);}
+.ct-cell.old{background:rgba(242,168,59,.4);}
+.ct-cell.new{background:var(--amber);}
+
+/* ── BODY ── */
+.ct-body{padding:8px 16px 16px;}
+.ct-body.form{padding:16px;}
+.ct-h{font-family:var(--font-display);font-weight:600;font-size:16px;text-transform:uppercase;letter-spacing:.05em;}
+.ct-sub{font-size:12px;color:var(--dim);margin:2px 0 16px;}
+
+/* ── JUMP MARKER (route transition) ── */
+.ct-jump{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;color:var(--faint);text-transform:uppercase;padding:14px 0 8px;}
+.ct-jump b{color:var(--steel);}
+
+/* ── STOP (leg card) ── */
+.ct-stop{display:flex;background:var(--panel);border:1px solid var(--edge);border-left:3px solid var(--amber);margin-bottom:8px;}
+.ct-stop.done{border-left-color:var(--ok);opacity:.62;}
+
+/* ── INDEX BLOCK (leg code) ── */
+.ct-index{width:74px;flex-shrink:0;padding:12px;border-right:1px solid var(--edge);background:var(--panel-2);}
+.ct-index .code{font-family:var(--font-mono);font-weight:800;font-size:22px;line-height:1;color:var(--txt);}
+.ct-index .leg{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;color:var(--faint);margin-top:6px;}
+
+/* ── MAIN / STATION ── */
+.ct-main{flex:1;padding:11px 14px;}
+.ct-station{font-family:var(--font-display);font-weight:600;font-size:15px;text-transform:uppercase;letter-spacing:.03em;}
+.ct-station small{color:var(--dim);font-weight:400;font-size:11px;margin-left:8px;letter-spacing:.05em;}
+
+/* ── OP LABELS (load / drop) ── */
+.ct-op-load{font-family:var(--font-mono);font-size:9px;letter-spacing:.14em;margin:9px 0 4px;font-weight:700;color:var(--amber);}
+.ct-op-drop{font-family:var(--font-mono);font-size:9px;letter-spacing:.14em;margin:9px 0 4px;font-weight:700;color:var(--steel);}
+
+/* ── ROW (cargo line item) ── */
+.ct-row{display:flex;align-items:center;gap:10px;padding:4px 0;font-family:var(--font-mono);font-size:12px;}
+.ct-row.lock{opacity:.4;}
+.ct-row.lock .ct-nm{text-decoration:line-through;}
+.ct-nm{flex:1;letter-spacing:.02em;}
+.ct-scu{color:var(--dim);}
+.ct-mn{color:var(--faint);font-size:10px;}
+
+/* ── CLAMP (checkbox indicator) ── */
+.ct-clamp{width:15px;height:15px;border:1px solid var(--faint);flex-shrink:0;}
+.ct-clamp.on{background:var(--ok);border-color:var(--ok);position:relative;}
+.ct-clamp.on::after{content:"■";color:var(--ink);font-size:8px;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+
+/* ── STRIPE (hazard / locked marker) ── */
+.ct-stripe{height:14px;margin:6px 0 2px;background:repeating-linear-gradient(45deg,var(--halt),var(--halt) 6px,transparent 6px,transparent 12px);opacity:.5;}
+
+/* ── NOTE (locked explanation) ── */
+.ct-note{font-family:var(--font-mono);font-size:9px;color:var(--halt);letter-spacing:.06em;padding-top:3px;}
+
+/* ── FORM (mission line-item grid) ── */
+.ct-form-head{display:grid;grid-template-columns:1.5fr 62px 1.4fr 1.4fr 26px;gap:8px;font-family:var(--font-mono);font-size:8.5px;letter-spacing:.1em;color:var(--faint);padding:0 2px 7px;text-transform:uppercase;}
+.ct-form-head .ld{color:var(--amber);}
+.ct-form-head .dp{color:var(--steel);}
+.ct-form-line{display:grid;grid-template-columns:1.5fr 62px 1.4fr 1.4fr 26px;gap:8px;align-items:stretch;margin-bottom:7px;}
+.ct-form-in{background:var(--panel);border:1px solid var(--edge);padding:9px 10px;font-family:var(--font-mono);font-size:12px;color:var(--txt);display:flex;align-items:center;}
+.ct-form-in.ph{color:var(--faint);}
+.ct-form-in.num{justify-content:center;}
+.ct-form-in.load{border-left:2px solid var(--amber);}
+.ct-form-in.drop{border-left:2px solid var(--steel);}
+.ct-form-rm{border:1px solid var(--edge);background:transparent;color:var(--faint);font-family:var(--font-mono);display:flex;align-items:center;justify-content:center;font-size:11px;}
+.ct-form-add{width:100%;padding:10px;background:transparent;border:1px dashed var(--edge);color:var(--dim);font-family:var(--font-display);font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-top:4px;}
+.ct-form-actions{display:flex;gap:8px;margin-top:18px;}
+.ct-form-opt{margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--faint);letter-spacing:.06em;cursor:pointer;}
+
+/* ── BUTTONS ── */
+.ct-btn-save{flex:1;padding:12px;background:var(--amber);border:none;color:var(--ink);font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;}
+.ct-btn-cancel{padding:12px 20px;background:transparent;border:1px solid var(--edge);color:var(--dim);font-family:var(--font-display);font-size:13px;letter-spacing:.08em;text-transform:uppercase;}
