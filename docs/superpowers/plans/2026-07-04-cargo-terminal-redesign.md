@@ -584,11 +584,12 @@ test('same station across missions is one stop', () => {
 });
 
 test('manual order overrides auto sort', () => {
-  const stops = buildRoute([mission(1, [mk({ origin: 'AAA', dest: 'ZZZ' })])], {
-    autoOrder: false, manualOrder: ['microTech|zzz', 'Hurston|aaa'],
+  // Auto sort would put Hurston/AAA before microTech/ZZZ; manual order reverses it.
+  // Keys are normalized lowercase: `${planet}|${station}`.
+  const stops = buildRoute([mission(1, [mk({ origin: 'AAA', originPlanet: 'Hurston', dest: 'ZZZ', planet: 'microTech' })])], {
+    autoOrder: false, manualOrder: ['microtech|zzz', 'hurston|aaa'],
   });
-  // manualOrder is keyed by stop.key; unknown-key ordering falls back to append.
-  expect(stops.length).toBe(2);
+  expect(stops.map((s) => s.key)).toEqual(['microtech|zzz', 'hurston|aaa']);
 });
 ```
 
