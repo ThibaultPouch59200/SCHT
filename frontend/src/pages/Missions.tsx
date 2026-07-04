@@ -79,6 +79,37 @@ export const Missions: React.FC = () => {
   };
 
   const activeMissions = missions.filter((m) => !m.completedAt);
+  const completedMissions = missions.filter((m) => m.completedAt);
+
+  const renderMissionCard = (m: (typeof missions)[number], done: boolean) => (
+    <div key={m.id} className={`ct-mission-card${done ? ' done' : ''}`}>
+      <div className="ct-mission-head">
+        <span className="ct-mission-id">MISSION #{m.id}</span>
+        <div className="ct-mission-actions">
+          <button className="ct-mission-btn" onClick={() => copyMission(m.id)}>
+            <Copy size={11} style={{ marginRight: 5 }} />
+            Copier
+          </button>
+          <button className="ct-mission-btn danger" onClick={() => deleteMission(m.id)}>
+            <X size={11} style={{ marginRight: 5 }} />
+            Supprimer
+          </button>
+        </div>
+      </div>
+      <div className="ct-mission-body">
+        {m.cargos.map((c) => (
+          <div key={c.id ?? `${c.res}-${c.origin}-${c.dest}`} className="ct-mission-cargo">
+            <span className="rt">
+              {c.origin} <b>→</b> {c.dest}
+            </span>
+            <span>{c.res}</span>
+            <span>{c.scu} SCU</span>
+            <span className={`st ${c.status.toLowerCase()}`}>{c.status}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   const loaded = missions
     .filter((m) => !m.completedAt)
@@ -177,35 +208,14 @@ export const Missions: React.FC = () => {
         {activeMissions.length === 0 ? (
           <div className="ct-empty">Aucune mission active. Enregistre une mission ci-dessus.</div>
         ) : (
-          activeMissions.map((m) => (
-            <div key={m.id} className="ct-mission-card">
-              <div className="ct-mission-head">
-                <span className="ct-mission-id">MISSION #{m.id}</span>
-                <div className="ct-mission-actions">
-                  <button className="ct-mission-btn" onClick={() => copyMission(m.id)}>
-                    <Copy size={11} style={{ marginRight: 5 }} />
-                    Copier
-                  </button>
-                  <button className="ct-mission-btn danger" onClick={() => deleteMission(m.id)}>
-                    <X size={11} style={{ marginRight: 5 }} />
-                    Supprimer
-                  </button>
-                </div>
-              </div>
-              <div className="ct-mission-body">
-                {m.cargos.map((c) => (
-                  <div key={c.id ?? `${c.res}-${c.origin}-${c.dest}`} className="ct-mission-cargo">
-                    <span className="rt">
-                      {c.origin} <b>→</b> {c.dest}
-                    </span>
-                    <span>{c.res}</span>
-                    <span>{c.scu} SCU</span>
-                    <span className={`st ${c.status.toLowerCase()}`}>{c.status}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))
+          activeMissions.map((m) => renderMissionCard(m, false))
+        )}
+
+        {completedMissions.length > 0 && (
+          <>
+            <div className="ct-dash-sec">Terminées</div>
+            {completedMissions.map((m) => renderMissionCard(m, true))}
+          </>
         )}
       </div>
     </div>
