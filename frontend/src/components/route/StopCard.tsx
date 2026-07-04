@@ -47,7 +47,7 @@ export const StopCard: React.FC<StopCardProps> = ({ stop, leg, onMoveUp, onMoveD
             {stop.loads.map((l) => (
               <div key={`l${l.cargoId}`} className="ct-row">
                 <Clamp checked={l.status !== 'PENDING'}
-                  onToggle={() => setStatus(l.missionId, l.cargoId, l.status === 'PENDING' ? 'LOADED' : 'PENDING')} />
+                  onToggle={() => setStatus(l.missionId, l.cargoId, l.status === 'PENDING' ? 'LOADED' : l.status === 'LOADED' ? 'PENDING' : 'LOADED')} />
                 <span className="ct-nm">{l.res}</span><span className="ct-scu">{l.scu} SCU</span>
                 <span className="ct-mn">M#{l.missionId}</span>
               </div>
