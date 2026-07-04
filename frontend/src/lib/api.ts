@@ -91,33 +91,17 @@ export const api = {
   // ── Missions ──────────────────────────────────────────────────────────
   missions: {
     list: () => request<SerializedMission[]>('/api/missions'),
-
-    create: (data: {
-      origin: string;
-      system: string;
-      pay: number;
-      cargos: { res: string; scu: number; dest: string; planet: string }[];
-    }) =>
-      request<SerializedMission>('/api/missions', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }),
-
+    create: (data: { cargos: { res: string; scu: number; origin: string; dest: string }[] }) =>
+      request<SerializedMission>('/api/missions', { method: 'POST', body: JSON.stringify(data) }),
     delete: (id: number) =>
       request<{ ok: boolean }>(`/api/missions/${id}`, { method: 'DELETE' }),
-
-    setDelivered: (missionId: number, cargoId: number, amount: number) =>
+    setStatus: (missionId: number, cargoId: number, status: 'PENDING' | 'LOADED' | 'DELIVERED') =>
+      request<SerializedMission>(`/api/missions/${missionId}/cargo/${cargoId}/status`,
+        { method: 'PATCH', body: JSON.stringify({ status }) }),
+    confirmStation: (missionId: number, station: string, op: 'load' | 'drop') =>
       request<SerializedMission>(
-        `/api/missions/${missionId}/cargo/${cargoId}/delivered`,
-        { method: 'PATCH', body: JSON.stringify({ amount }) }
-      ),
-
-    confirmStation: (missionId: number, stationName: string) =>
-      request<SerializedMission>(
-        `/api/missions/${missionId}/stations/${encodeURIComponent(stationName)}/confirm`,
-        { method: 'POST' }
-      ),
-
+        `/api/missions/${missionId}/stations/${encodeURIComponent(station)}/confirm?op=${op}`,
+        { method: 'POST' }),
     copy: (id: number) =>
       request<SerializedMission>(`/api/missions/${id}/copy`, { method: 'POST' }),
   },
@@ -135,61 +119,18 @@ export const api = {
       ),
   },
 
-  // ── Finance ───────────────────────────────────────────────────────────
-  finance: {
-    get: () =>
-      request<{ wallet: number; transactions: SerializedTransaction[] }>(
-        '/api/finance'
-      ),
-    setWallet: (amount: number) =>
-      request<{ wallet: number; transactions: SerializedTransaction[] }>(
-        '/api/finance/wallet',
-        { method: 'PUT', body: JSON.stringify({ amount }) }
-      ),
-    addTransaction: (data: {
-      amount: number;
-      desc: string;
-      type: string;
-      missionId?: number;
-    }) =>
-      request<SerializedTransaction>('/api/finance/transactions', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }),
-    deleteTransaction: (id: number) =>
-      request<{ ok: boolean }>(`/api/finance/transactions/${id}`, {
-        method: 'DELETE',
-      }),
-  },
 };
 
 // ── Shared types (mirror backend serialization) ──────────────────────────────
 
-export interface SerializedCargoLine {
-  id: number;
-  res: string;
-  scu: number;
-  dest: string;
-  planet: string;
-  delivered: number;
-  confirmed: boolean;
-}
-
 export interface SerializedMission {
   id: number;
-  origin: string;
-  system: string;
-  pay: number;
   createdAt: string;
   completedAt: string | null;
-  cargos: SerializedCargoLine[];
-}
-
-export interface SerializedTransaction {
-  id: number;
-  date: string;
-  desc: string;
-  amount: number;
-  type: string;
-  missionId?: number | null;
+  cargos: {
+    id: number; res: string; scu: number;
+    origin: string; originPlanet: string;
+    dest: string; planet: string;
+    status: 'PENDING' | 'LOADED' | 'DELIVERED';
+  }[];
 }
