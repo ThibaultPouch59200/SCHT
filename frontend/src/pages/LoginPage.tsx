@@ -23,25 +23,27 @@ export function LoginPage() {
   }
 
   return (
-    <div className="login-page">
-      <div className="login-card">
-        <div className="login-logo">
-          <span className="login-logo-text">SCHT</span>
-          <span className="login-logo-sub">SC Hauling Tracker</span>
+    <div className="ct-login-page">
+      <div className="ct-login-card">
+        <div className="ct-login-brand">
+          <span className="ct-login-brand-text">
+            HAUL<b>{'//'}</b>OPS
+          </span>
+          <span className="ct-login-brand-sub">Cargo Terminal Access</span>
         </div>
 
-        <form onSubmit={handleSubmit} className="login-form">
-          <h2 className="login-title">
+        <form onSubmit={handleSubmit} className="ct-login-form">
+          <h2 className="ct-login-title">
             {mode === 'login' ? 'Connexion' : 'Créer un compte'}
           </h2>
 
           {error && (
-            <div className="login-error" role="alert">
+            <div className="ct-login-error" role="alert">
               {error}
             </div>
           )}
 
-          <div className="login-field">
+          <div className="ct-login-field">
             <label htmlFor="username">Identifiant</label>
             <input
               id="username"
@@ -55,7 +57,7 @@ export function LoginPage() {
             />
           </div>
 
-          <div className="login-field">
+          <div className="ct-login-field">
             <label htmlFor="password">Mot de passe</label>
             <input
               id="password"
@@ -69,12 +71,12 @@ export function LoginPage() {
             />
           </div>
 
-          <button type="submit" className="btn-primary login-submit" disabled={loading}>
+          <button type="submit" className="ct-btn-primary" disabled={loading}>
             {loading ? 'Chargement…' : mode === 'login' ? 'Se connecter' : "S'inscrire"}
           </button>
         </form>
 
-        <button className="login-switch" onClick={switchMode} disabled={loading}>
+        <button className="ct-login-switch" onClick={switchMode} disabled={loading}>
           {mode === 'login'
             ? "Pas encore de compte ? S'inscrire"
             : 'Déjà un compte ? Se connecter'}

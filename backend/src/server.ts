@@ -4,7 +4,6 @@ import authRouter from './routes/auth';
 import locationsRouter from './routes/locations';
 import resourcesRouter from './routes/resources';
 import missionsRouter from './routes/missions';
-import financeRouter from './routes/finance';
 import shipsRouter from './routes/ships';
 
 const app = express();
@@ -20,7 +19,6 @@ app.use('/api/auth', authRouter);
 app.use('/api/locations', locationsRouter);
 app.use('/api/resources', resourcesRouter);
 app.use('/api/missions', missionsRouter);
-app.use('/api/finance', financeRouter);
 app.use('/api/ships', shipsRouter);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));

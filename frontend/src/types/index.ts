@@ -1,33 +1,23 @@
 export interface Ship {
-  id: number
-  name: string
-  manufacturer: string
-  scu: number
-  category: string
+  id: number; name: string; manufacturer: string; scu: number; category: string;
 }
 
+export type CargoStatus = 'PENDING' | 'LOADED' | 'DELIVERED';
+
 export interface CargoLine {
-  id?: number;  // present when fetched from API
+  id?: number;
   res: string;
   scu: number;
-  dest: string;
-  planet: string;
+  origin: string;        // pickup station
+  originPlanet: string;
+  dest: string;          // delivery station
+  planet: string;        // delivery planet
+  status: CargoStatus;
 }
 
 export interface Mission {
   id: number;
-  origin: string;
-  system: string;
-  pay: number;
   cargos: CargoLine[];
   createdAt: string;
-}
-
-export interface Transaction {
-  id: number;
-  date: string;
-  desc: string;
-  amount: number;
-  type: 'mission' | 'wallet';
-  missionId?: number;
+  completedAt?: string | null;
 }

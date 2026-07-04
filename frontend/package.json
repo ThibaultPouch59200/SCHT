@@ -7,13 +7,15 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "dependencies": {
-    "chart.js": "^4.5.1",
+    "@fontsource/barlow": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/oswald": "^5.2.8",
     "lucide-react": "^1.7.0",
     "react": "^19.2.4",
-    "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.2",
     "zustand": "^5.0.12"
@@ -33,6 +35,7 @@
     "tailwindcss": "^4.2.2",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.57.0",
-    "vite": "^8.0.1"
+    "vite": "^8.0.1",
+    "vitest": "^2.1.9"
   }
 }

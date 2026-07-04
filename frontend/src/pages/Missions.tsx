@@ -1,28 +1,28 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Plus, X, Copy } from 'lucide-react';
-import type { Mission } from '../types';
 import { useMissionStore } from '../store/useMissionStore';
 import { useListsStore } from '../store/useListsStore';
 import { useShipStore } from '../store/useShipStore';
-import { StatusBadge } from '../components/ui/StatusBadge';
 import { ComboSelect } from '../components/ui/ComboSelect';
-import { parseAmount, fmtShort } from '../utils/parseAmount';
-import type { CargoLine } from '../types';
+import { CapacityGauge } from '../components/route/CapacityGauge';
 
 interface CargoFormLine {
   id: number;
   res: string;
   scu: string;
+  origin: string;
   dest: string;
-  planet: string;
+}
+
+function blankLine(id: number): CargoFormLine {
+  return { id, res: '', scu: '', origin: '', dest: '' };
 }
 
 export const Missions: React.FC = () => {
   const missions = useMissionStore((s) => s.missions);
-  const completedIds = useMissionStore((s) => s.completedIds);
-  const deliveredById = useMissionStore((s) => s.deliveredById);
   const addMission = useMissionStore((s) => s.addMission);
   const deleteMission = useMissionStore((s) => s.deleteMission);
+  const copyMission = useMissionStore((s) => s.copyMission);
 
   const locations = useListsStore((s) => s.locations);
   const resources = useListsStore((s) => s.resources);
@@ -38,90 +38,34 @@ export const Missions: React.FC = () => {
 
   const locationNames = locations.map((l) => l.name);
 
-  const [formOpen, setFormOpen] = useState(false);
-  const [origin, setOrigin] = useState('');
-  const [system, setSystem] = useState('Stanton');
-  const [pay, setPay] = useState('');
-  const [cargoLines, setCargoLines] = useState<CargoFormLine[]>([]);
-  const cargoIdRef = useRef(0);
-
-  const openForm = () => {
-    cargoIdRef.current += 1;
-    setOrigin('');
-    setSystem('Stanton');
-    setPay('');
-    setCargoLines([{ id: cargoIdRef.current, res: '', scu: '', dest: '', planet: '' }]);
-    setFormOpen(true);
-  };
-
-  const copyMission = (m: Mission, scroll = true) => {
-    const lines = m.cargos.map((c) => {
-      cargoIdRef.current += 1;
-      return { id: cargoIdRef.current, res: c.res, scu: String(c.scu), dest: c.dest, planet: c.planet };
-    });
-    setOrigin(m.origin);
-    setSystem(m.system);
-    setPay(m.pay > 0 ? String(m.pay) : '');
-    setCargoLines(lines);
-    setFormOpen(true);
-    if (scroll) window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const cargoIdRef = useRef(1);
+  const [cargoLines, setCargoLines] = useState<CargoFormLine[]>([blankLine(1)]);
 
   const addCargoLine = () => {
     cargoIdRef.current += 1;
-    setCargoLines((lines) => [
-      ...lines,
-      { id: cargoIdRef.current, res: '', scu: '', dest: '', planet: '' },
-    ]);
+    setCargoLines((lines) => [...lines, blankLine(cargoIdRef.current)]);
   };
 
   const removeCargoLine = (id: number) => {
     setCargoLines((lines) => lines.filter((l) => l.id !== id));
   };
 
-  const updateCargo = (id: number, field: keyof CargoFormLine, value: string) => {
-    setCargoLines((lines) =>
-      lines.map((l) => (l.id === id ? { ...l, [field]: value } : l))
-    );
+  const updateCargo = (id: number, field: keyof Omit<CargoFormLine, 'id'>, value: string) => {
+    setCargoLines((lines) => lines.map((l) => (l.id === id ? { ...l, [field]: value } : l)));
   };
 
-  // Origin created via "Créer" → add to locations using current system
-  const handleOriginCreate = (name: string) => {
-    addLocation({ name, system, planet: 'Autre' });
-    setOrigin(name);
-  };
-
-  // Destination selected from list → auto-fill planet
-  const handleDestSelect = (id: number, name: string) => {
-    const loc = locations.find((l) => l.name === name);
-    setCargoLines((lines) =>
-      lines.map((l) =>
-        l.id === id ? { ...l, dest: name, planet: loc ? loc.planet : l.planet } : l
-      )
-    );
-  };
-
-  // Destination created via "Créer" → add to locations using mission system
-  const handleDestCreate = (id: number, name: string) => {
-    const line = cargoLines.find((l) => l.id === id);
-    const planet = line?.planet.trim() || 'Autre';
-    addLocation({ name, system, planet });
-    setCargoLines((lines) =>
-      lines.map((l) => (l.id === id ? { ...l, dest: name } : l))
-    );
+  const resetForm = () => {
+    cargoIdRef.current += 1;
+    setCargoLines([blankLine(cargoIdRef.current)]);
   };
 
   const saveMission = () => {
-    if (!origin.trim()) {
-      alert('Remplis le lieu de récupération.');
-      return;
-    }
-    const cargos: CargoLine[] = cargoLines
+    const cargos = cargoLines
       .map((l) => ({
-        res: l.res.trim() || 'Inconnu',
-        scu: parseInt(l.scu) || 0,
-        dest: l.dest.trim() || 'Station inconnue',
-        planet: l.planet.trim() || 'Autre',
+        res: l.res.trim(),
+        scu: Number.parseInt(l.scu, 10) || 0,
+        origin: l.origin.trim(),
+        dest: l.dest.trim(),
       }))
       .filter((c) => c.scu > 0);
 
@@ -130,294 +74,149 @@ export const Missions: React.FC = () => {
       return;
     }
 
-    // Auto-add values not yet in lists
-    if (!locations.some((l) => l.name === origin.trim())) {
-      addLocation({ name: origin.trim(), system, planet: 'Autre' });
-    }
-    cargos.forEach((c) => {
-      if (c.res !== 'Inconnu' && !resources.includes(c.res)) addResource(c.res);
-      if (c.dest !== 'Station inconnue' && !locations.some((l) => l.name === c.dest)) {
-        addLocation({ name: c.dest, system, planet: c.planet });
-      }
-    });
-
-    addMission({ origin: origin.trim(), system, pay: parseAmount(pay), cargos });
-    setFormOpen(false);
+    addMission(cargos);
+    resetForm();
   };
 
-  return (
-    <div className="page-anim" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-      <div className="content">
-        {!formOpen && (
-          <button className="mission-add-btn" onClick={openForm}>
-            <Plus size={14} />
-            Nouvelle mission
+  const activeMissions = missions.filter((m) => !m.completedAt);
+  const completedMissions = missions.filter((m) => m.completedAt);
+
+  const renderMissionCard = (m: (typeof missions)[number], done: boolean) => (
+    <div key={m.id} className={`ct-mission-card${done ? ' done' : ''}`}>
+      <div className="ct-mission-head">
+        <span className="ct-mission-id">MISSION #{m.id}</span>
+        <div className="ct-mission-actions">
+          <button className="ct-mission-btn" onClick={() => copyMission(m.id)}>
+            <Copy size={11} style={{ marginRight: 5 }} />
+            Copier
           </button>
-        )}
-
-        {formOpen && (
-          <div className="mission-form-panel">
-            <div className="form-title">Enregistrement mission cargo</div>
-
-            {missions.filter((m) => !completedIds.includes(m.id)).length > 0 && (
-              <div className="form-field" style={{ marginBottom: '12px' }}>
-                <label>Charger depuis une mission existante</label>
-                <select
-                  defaultValue=""
-                  onChange={(e) => {
-                    const id = parseInt(e.target.value);
-                    const m = missions.find((x) => x.id === id);
-                    if (m) copyMission(m, false);
-                    e.target.value = '';
-                  }}
-                >
-                  <option value="" disabled>— Sélectionner un modèle —</option>
-                  {missions.filter((m) => !completedIds.includes(m.id)).map((m) => {
-                    const totalScu = m.cargos.reduce((a, c) => a + c.scu, 0);
-                    const dests = [...new Set(m.cargos.map((c) => c.dest))].length;
-                    return (
-                      <option key={m.id} value={m.id}>
-                        {m.origin} → [{dests} dest.] — {totalScu} SCU
-                        {m.pay > 0 ? ` — ${fmtShort(m.pay)} aUEC` : ''}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-            )}
-
-            <div className="form-grid-3">
-              <div className="form-field">
-                <label>Lieu de récupération</label>
-                <ComboSelect
-                  options={locationNames}
-                  value={origin}
-                  onChange={(v) => {
-                    setOrigin(v);
-                    const loc = locations.find((l) => l.name === v);
-                    if (loc) setSystem(loc.system);
-                  }}
-                  onCreateNew={handleOriginCreate}
-                  placeholder="Ex: Everus Harbor"
-                />
-              </div>
-              <div className="form-field">
-                <label>Système stellaire</label>
-                <select value={system} onChange={(e) => setSystem(e.target.value)}>
-                  <option>Stanton</option>
-                  <option>Pyro</option>
-                  <option>Nyx</option>
-                </select>
-              </div>
-              <div className="form-field">
-                <label>Paiement mission (aUEC)</label>
-                <input
-                  type="text"
-                  placeholder="Ex: 90k · 1.5M · 450000"
-                  value={pay}
-                  onChange={(e) => setPay(e.target.value)}
-                />
-                <div className="form-hint">90k = 90 000 · 1.5M = 1 500 000</div>
-              </div>
-            </div>
-
-            {(() => {
-              const existingScu = missions
-                .filter((m) => !completedIds.includes(m.id))
-                .reduce((sum, m) => sum + m.cargos.reduce((s, c) => s + Math.max(0, c.scu - (c.id != null ? (deliveredById[c.id] ?? 0) : 0)), 0), 0);
-              const formScu = cargoLines.reduce((sum, l) => sum + (parseInt(l.scu) || 0), 0);
-              const totalScu = existingScu + formScu;
-              const cap = selectedShip?.scu ?? null;
-              const pctExisting = cap ? Math.min(existingScu / cap, 1) : 0;
-              const pctForm = cap ? Math.min(formScu / cap, Math.max(0, 1 - pctExisting)) : 0;
-              const overloaded = cap !== null && totalScu > cap;
-              const barColor = cap === null
-                ? 'var(--accent)'
-                : overloaded
-                  ? 'var(--red)'
-                  : totalScu / cap > 0.8
-                    ? 'var(--amber)'
-                    : 'var(--green)';
-              return (
-                <>
-                  <div className="scu-bar-block">
-                    <div className="scu-bar-header">
-                      <span className="scu-bar-label">CAPACITÉ VAISSEAU</span>
-                      <span className="scu-bar-value" style={{ color: barColor }}>
-                        {totalScu} / {cap !== null ? `${cap} SCU` : '— SCU'}
-                      </span>
-                    </div>
-                    <div className="scu-bar-track">
-                      <div
-                        className="scu-bar-fill scu-bar-existing"
-                        style={{ width: `${pctExisting * 100}%` }}
-                      />
-                      <div
-                        className="scu-bar-fill scu-bar-new"
-                        style={{ width: `${pctForm * 100}%`, backgroundColor: barColor }}
-                      />
-                    </div>
-                    <div className="scu-bar-legend">
-                      <span className="scu-legend-existing">▮ Missions existantes ({existingScu} SCU)</span>
-                      <span className="scu-legend-new" style={{ color: barColor }}>▮ Cette mission ({formScu} SCU)</span>
-                    </div>
-                  </div>
-                  {overloaded && (
-                    <div className="scu-overload-banner">
-                      ⚠ Chargement dépassé — votre vaisseau ne peut pas transporter tout ce cargo
-                    </div>
-                  )}
-                </>
-              );
-            })()}
-            <div className="cargo-section-title">Cargaisons — lieux de livraison</div>
-            <div className="cargo-inputs">
-              {cargoLines.map((line) => {
-                const destInList = locations.some((l) => l.name === line.dest);
-                const showPlanet = line.dest.trim().length > 0 && !destInList;
-                return (
-                  <div key={line.id} className="cargo-input-row">
-                    <ComboSelect
-                      options={resources}
-                      value={line.res}
-                      onChange={(v) => updateCargo(line.id, 'res', v)}
-                      onCreateNew={(name) => {
-                        addResource(name);
-                        updateCargo(line.id, 'res', name);
-                      }}
-                      placeholder="Matière"
-                      style={{ flex: 2 }}
-                    />
-                    <input
-                      type="number"
-                      min={1}
-                      placeholder="SCU"
-                      style={{ flex: '0 0 72px' }}
-                      value={line.scu}
-                      onChange={(e) => updateCargo(line.id, 'scu', e.target.value)}
-                    />
-                    <ComboSelect
-                      options={locationNames}
-                      value={line.dest}
-                      onChange={(v) => handleDestSelect(line.id, v)}
-                      onCreateNew={(name) => handleDestCreate(line.id, name)}
-                      placeholder="Destination"
-                      style={{ flex: 2 }}
-                    />
-                    {showPlanet && (
-                      <input
-                        type="text"
-                        placeholder="Planète"
-                        style={{ flex: '0 0 110px' }}
-                        value={line.planet}
-                        onChange={(e) => updateCargo(line.id, 'planet', e.target.value)}
-                      />
-                    )}
-                    <button
-                      className="cargo-rm"
-                      onClick={() => removeCargoLine(line.id)}
-                      aria-label="Supprimer cette cargaison"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-            <button className="add-cargo-line" onClick={addCargoLine}>
-              + Ajouter destination / matière
-            </button>
-
-            <div className="form-actions">
-              <button className="btn-confirm" onClick={saveMission}>
-                Enregistrer mission
-              </button>
-              <button className="btn-cancel-form" onClick={() => setFormOpen(false)}>
-                Annuler
-              </button>
-            </div>
+          <button className="ct-mission-btn danger" onClick={() => deleteMission(m.id)}>
+            <X size={11} style={{ marginRight: 5 }} />
+            Supprimer
+          </button>
+        </div>
+      </div>
+      <div className="ct-mission-body">
+        {m.cargos.map((c) => (
+          <div key={c.id ?? `${c.res}-${c.origin}-${c.dest}`} className="ct-mission-cargo">
+            <span className="rt">
+              {c.origin} <b>→</b> {c.dest}
+            </span>
+            <span>{c.res}</span>
+            <span>{c.scu} SCU</span>
+            <span className={`st ${c.status.toLowerCase()}`}>{c.status}</span>
           </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const loaded = missions
+    .filter((m) => !m.completedAt)
+    .flatMap((m) => m.cargos)
+    .filter((c) => c.status === 'LOADED')
+    .reduce((n, c) => n + c.scu, 0);
+
+  const incoming = cargoLines.reduce((sum, l) => sum + (Number.parseInt(l.scu, 10) || 0), 0);
+
+  return (
+    <div className="ct-page">
+      <div className="ct-page-bar">
+        <CapacityGauge loaded={loaded} incoming={incoming} capacity={selectedShip?.scu ?? null} />
+      </div>
+      <div className="ct-content">
+        <div className="ct-h">Nouvelle mission</div>
+        <div className="ct-sub">Une ligne = une cargaison. Où la charger ▲, où la déposer ▼. C'est tout.</div>
+
+        <div className="ct-form-head">
+          <span>Commodité</span>
+          <span>SCU</span>
+          <span className="ld">▲ Charge</span>
+          <span className="dp">▼ Dépôt</span>
+          <span />
+        </div>
+
+        {cargoLines.map((line) => (
+          <div key={line.id} className="ct-form-line">
+            <div className="ct-form-in">
+              <ComboSelect
+                options={resources}
+                value={line.res}
+                onChange={(v) => updateCargo(line.id, 'res', v)}
+                onCreateNew={(name) => addResource(name)}
+                placeholder="Commodité…"
+                style={{ width: '100%' }}
+              />
+            </div>
+            <div className="ct-form-in num">
+              <input
+                type="number"
+                min={1}
+                placeholder="—"
+                value={line.scu}
+                onChange={(e) => updateCargo(line.id, 'scu', e.target.value)}
+              />
+            </div>
+            <div className="ct-form-in load">
+              <ComboSelect
+                options={locationNames}
+                value={line.origin}
+                onChange={(v) => updateCargo(line.id, 'origin', v)}
+                onCreateNew={(name) => addLocation({ name, system: 'Stanton', planet: 'Autre' })}
+                placeholder="Station…"
+                style={{ width: '100%' }}
+              />
+            </div>
+            <div className="ct-form-in drop">
+              <ComboSelect
+                options={locationNames}
+                value={line.dest}
+                onChange={(v) => updateCargo(line.id, 'dest', v)}
+                onCreateNew={(name) => addLocation({ name, system: 'Stanton', planet: 'Autre' })}
+                placeholder="Station…"
+                style={{ width: '100%' }}
+              />
+            </div>
+            <button
+              className="ct-form-rm"
+              onClick={() => removeCargoLine(line.id)}
+              aria-label="Supprimer cette cargaison"
+            >
+              <X size={12} />
+            </button>
+          </div>
+        ))}
+
+        <button className="ct-form-add" onClick={addCargoLine}>
+          <Plus size={12} style={{ marginRight: 6, verticalAlign: -2 }} />
+          Ajouter une cargaison
+        </button>
+
+        <div className="ct-form-actions">
+          <button className="ct-btn-save" onClick={saveMission}>
+            Enregistrer
+          </button>
+          <button className="ct-btn-cancel" onClick={resetForm}>
+            Annuler
+          </button>
+        </div>
+
+        <div className="ct-h" style={{ marginTop: 28 }}>
+          Missions actives
+        </div>
+
+        {activeMissions.length === 0 ? (
+          <div className="ct-empty">Aucune mission active. Enregistre une mission ci-dessus.</div>
+        ) : (
+          activeMissions.map((m) => renderMissionCard(m, false))
         )}
 
-        <div className="section-head" style={{ marginTop: '4px' }}>
-          <h2>Missions enregistrées</h2>
-        </div>
-
-        <div className="missions-list">
-          {missions.filter((m) => !completedIds.includes(m.id)).length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">🚚</div>
-              Aucune mission active.<br />Crée une nouvelle mission ou consulte l'historique.
-            </div>
-          ) : (
-            missions.filter((m) => !completedIds.includes(m.id)).map((m) => {
-              const allDone = false;
-              const totalScu = m.cargos.reduce((a, c) => a + c.scu, 0);
-              const uniqueDests = [...new Set(m.cargos.map((c) => c.dest))];
-
-              const byDest: Record<string, typeof m.cargos> = {};
-              m.cargos.forEach((c) => {
-                if (!byDest[c.dest]) byDest[c.dest] = [];
-                byDest[c.dest].push(c);
-              });
-
-              return (
-                <div key={m.id} className={`mission-card${allDone ? ' done-mission' : ''}`}>
-                  <div className="mission-card-header">
-                    <div className="mission-route-info">
-                      <div className="mission-route">
-                        {m.origin}
-                        <span className="arr">→</span>
-                        [{uniqueDests.length} dest.]
-                      </div>
-                      <div className="mission-meta">
-                        Système<span>{m.system}</span>{totalScu} SCU total
-                      </div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div className="mission-pay-label">PAIEMENT</div>
-                      <div className="mission-pay">
-                        {m.pay > 0 ? `${fmtShort(m.pay)} aUEC` : '—'}
-                      </div>
-                    </div>
-                    <StatusBadge variant={allDone ? 'done' : 'active'} />
-                    <button
-                      className="replay-btn"
-                      onClick={() => copyMission(m)}
-                      title="Copier cette mission"
-                    >
-                      <Copy size={12} style={{ marginRight: 5 }} />
-                      Copier
-                    </button>
-                    <button
-                      className="mission-del"
-                      onClick={() => deleteMission(m.id)}
-                      aria-label="Supprimer cette mission"
-                    >
-                      SUPPR.
-                    </button>
-                  </div>
-                  <div className="mission-card-body">
-                    <div className="delivery-targets">
-                      {Object.entries(byDest).map(([dest, cgs]) => (
-                        <div key={dest} className="delivery-target">
-                          <div className="dt-arrow">▶</div>
-                          <div className="dt-dest">{dest}</div>
-                          <div className="dt-res">
-                            {cgs.map((c) => c.res).join(', ')}
-                          </div>
-                          <div className="dt-scu">
-                            {cgs.reduce((a, c) => a + c.scu, 0)} SCU
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
+        {completedMissions.length > 0 && (
+          <>
+            <div className="ct-dash-sec">Terminées</div>
+            {completedMissions.map((m) => renderMissionCard(m, true))}
+          </>
+        )}
       </div>
     </div>
   );
