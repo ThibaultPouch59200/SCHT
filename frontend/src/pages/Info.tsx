@@ -21,7 +21,7 @@ export const Info: React.FC = () => {
             <li>Va dans <strong>Missions</strong> et crée une mission avec les cargos.</li>
             <li>Ouvre <strong>Route</strong> pour suivre les livraisons par station.</li>
             <li>Confirme les SCU livrés à chaque escale.</li>
-            <li>Une fois la mission terminée, retrouve-la dans <strong>Journal</strong>.</li>
+            <li>Une fois terminée, la mission reste dans <strong>Missions</strong> (grisée) et compte dans le <strong>Dashboard</strong>.</li>
           </ol>
         </div>
 
@@ -30,7 +30,7 @@ export const Info: React.FC = () => {
           <ul className="ct-info-list">
             <li><strong>Route</strong> : suivi opérationnel des stations et SCU.</li>
             <li><strong>Missions</strong> : création et duplication des missions.</li>
-            <li><strong>Journal</strong> : missions terminées et archivées.</li>
+            <li><strong>Dashboard</strong> : statistiques, activité par jour et missions en cours.</li>
             <li><strong>Réglages</strong> : gestion des listes (lieux, ressources, vaisseau).</li>
           </ul>
         </div>
