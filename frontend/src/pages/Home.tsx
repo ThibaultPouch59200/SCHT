@@ -12,7 +12,7 @@ export const Home: React.FC = () => {
   const ship = useShipStore((s) => s.selectedShip);
 
   const stops = buildRoute(missions, { autoOrder, manualOrder });
-  const loaded = missions.flatMap((m) => m.cargos)
+  const loaded = missions.filter((m) => !m.completedAt).flatMap((m) => m.cargos)
     .filter((c) => c.status === 'LOADED').reduce((n, c) => n + c.scu, 0);
 
   // Reorder: swap the displayed stop at `i` with its neighbour and persist the
