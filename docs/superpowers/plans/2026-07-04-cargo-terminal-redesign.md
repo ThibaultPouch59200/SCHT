@@ -16,6 +16,7 @@
 - **Palette tokens (dark-only):** `--ink:#0e1116`, `--panel:#161b22`, `--panel-2:#1c222c`, `--edge:#2a323f`, `--amber:#f2a83b` (charge/récup + interactive), `--steel:#6ea8bf` (dépôt/livraison), `--ok:#7bb366`, `--halt:#e06b5c`, `--txt:#e6e9ee`, `--dim:#8b94a3`, `--faint:#565f6e`.
 - **Fonts:** Oswald (display), JetBrains Mono (data), Barlow (body).
 - **UI language is French** (labels, copy) — match existing app.
+- **Commit messages: do NOT add any `Co-Authored-By` trailer** (no Claude/Anthropic co-author line). Plain messages only, exactly as shown in each task.
 - **Validated mockups** (exact styling reference) live at `.superpowers/brainstorm/92745-1783185038/content/route-directions.html` (Direction A) and `mission-terminal.html`. Treat their CSS as the source of truth for the re-skin.
 - Spec: `docs/superpowers/specs/2026-07-04-cargo-terminal-redesign-design.md`.
 
@@ -958,21 +959,36 @@ git commit -m "feat(ui): Clamp + CapacityGauge components"
 
 **Interfaces:**
 - Consumes: `buildRoute` (Task 6), `useMissionStore`, `useRouteStore`, `useShipStore`, `Clamp`, `CapacityGauge`.
+- Manual reorder: `StopCard` exposes `onMoveUp`/`onMoveDown`/`canUp`/`canDown`; `Home` swaps adjacent stop keys and calls `setManualOrder(keys)` (which also flips `autoOrder` off).
 
 - [ ] **Step 1: Implement `StopCard.tsx`**
 
-Render one `Stop` (Task 6 type): index block (`code` + `LEG NN` passed as prop), station name + planet, a `▲ CHARGEMENT` section listing `loads` and a `▼ DÉPÔT` section listing `drops`. Each row = `Clamp` + resource + `scu` + mission tag. Locked drops: add `.ct-row.lock`, disable the clamp, show `⊘ VERROUILLÉ — CHARGER À {loadCode}` and a `.ct-stripe`. Clamp handlers call `setCargoStatus(missionId, cargoId, 'LOADED')` for loads and `'DELIVERED'` for drops (toggle back to previous state on uncheck).
+Render one `Stop` (Task 6 type): index block (`code` + `LEG NN` passed as prop) with **up/down reorder arrows**, station name + planet, a `▲ CHARGEMENT` section listing `loads` and a `▼ DÉPÔT` section listing `drops`. Each row = `Clamp` + resource + `scu` + mission tag. Locked drops: add `.ct-row.lock`, disable the clamp, show `⊘ VERROUILLÉ — CHARGER À {loadCode}` and a `.ct-stripe`. Clamp handlers call `setCargoStatus(missionId, cargoId, 'LOADED')` for loads and `'DELIVERED'` for drops (toggle back to previous state on uncheck). The arrows call `onMoveUp`/`onMoveDown` and are disabled at the ends (`canUp`/`canDown`).
 ```tsx
 import React from 'react';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 import type { Stop } from '../../lib/route';
 import { Clamp } from './Clamp';
 import { useMissionStore } from '../../store/useMissionStore';
 
-export const StopCard: React.FC<{ stop: Stop; leg: number }> = ({ stop, leg }) => {
+interface StopCardProps {
+  stop: Stop; leg: number;
+  onMoveUp: () => void; onMoveDown: () => void;
+  canUp: boolean; canDown: boolean;
+}
+
+export const StopCard: React.FC<StopCardProps> = ({ stop, leg, onMoveUp, onMoveDown, canUp, canDown }) => {
   const setStatus = useMissionStore((s) => s.setCargoStatus);
   return (
     <div className={`ct-stop${stop.done ? ' done' : ''}`}>
-      <div className="ct-index"><div className="code">{stop.code}</div><div className="leg">LEG {String(leg).padStart(2, '0')}</div></div>
+      <div className="ct-index">
+        <div className="code">{stop.code}</div>
+        <div className="leg">LEG {String(leg).padStart(2, '0')}</div>
+        <div className="ct-reorder">
+          <button className="ct-arrow" onClick={onMoveUp} disabled={!canUp} aria-label="Monter l'arrêt"><ChevronUp size={14} /></button>
+          <button className="ct-arrow" onClick={onMoveDown} disabled={!canDown} aria-label="Descendre l'arrêt"><ChevronDown size={14} /></button>
+        </div>
+      </div>
       <div className="ct-stop-main">
         <div className="ct-station">{stop.station}<small>{stop.planet}</small></div>
         {stop.drops.length > 0 && (
@@ -1023,12 +1039,22 @@ import { CapacityGauge } from '../components/route/CapacityGauge';
 
 export const Home: React.FC = () => {
   const missions = useMissionStore((s) => s.missions);
-  const { autoOrder, manualOrder, toggleAuto } = useRouteStore();
+  const { autoOrder, manualOrder, toggleAuto, setManualOrder } = useRouteStore();
   const ship = useShipStore((s) => s.selectedShip);
 
   const stops = buildRoute(missions, { autoOrder, manualOrder });
   const loaded = missions.flatMap((m) => m.cargos)
     .filter((c) => c.status === 'LOADED').reduce((n, c) => n + c.scu, 0);
+
+  // Reorder: swap the displayed stop at `i` with its neighbour and persist the
+  // full key order. setManualOrder also switches the store into manual mode.
+  const move = (i: number, dir: -1 | 1) => {
+    const keys = stops.map((s) => s.key);
+    const j = i + dir;
+    if (j < 0 || j >= keys.length) return;
+    [keys[i], keys[j]] = [keys[j], keys[i]];
+    setManualOrder(keys);
+  };
 
   let lastPlanet = '';
   return (
@@ -1047,7 +1073,11 @@ export const Home: React.FC = () => {
           return (
             <React.Fragment key={s.key}>
               {jump && <div className="ct-jump">↝ SAUT QUANTIQUE VERS <b>{jump}</b></div>}
-              <StopCard stop={s} leg={i + 1} />
+              <StopCard
+                stop={s} leg={i + 1}
+                onMoveUp={() => move(i, -1)} onMoveDown={() => move(i, 1)}
+                canUp={i > 0} canDown={i < stops.length - 1}
+              />
             </React.Fragment>
           );
         })}
@@ -1057,12 +1087,14 @@ export const Home: React.FC = () => {
 };
 ```
 
+> **Note on reordering + auto sort:** clicking an arrow calls `setManualOrder`, which turns `autoOrder` off, so the manual order sticks. Toggling `AUTO ON` again re-applies the automatic sort (manual order is retained in storage but ignored while auto is on).
+
 - [ ] **Step 3: Delete old home components**
 ```bash
 git rm frontend/src/components/home/PlanetGroup.tsx frontend/src/components/home/StationBlock.tsx frontend/src/components/home/ResourceRow.tsx
 ```
 
-- [ ] **Step 4: Add `.ct-stop`, `.ct-index`, `.ct-op-*`, `.ct-row`, `.ct-note`, `.ct-jump`, `.ct-toggle`, `.ct-page*`, `.ct-empty`** rules to `cargo-terminal.css` from the Direction A mockup.
+- [ ] **Step 4: Add `.ct-stop`, `.ct-index`, `.ct-reorder`, `.ct-arrow`, `.ct-op-*`, `.ct-row`, `.ct-note`, `.ct-jump`, `.ct-toggle`, `.ct-page*`, `.ct-empty`** rules to `cargo-terminal.css` from the Direction A mockup. `.ct-arrow` = small icon button (transparent, `--edge` border, `--faint` icon; `--amber` on hover; `opacity:.3` when `:disabled`); `.ct-reorder` stacks the two arrows vertically in the index block.
 
 - [ ] **Step 5: Verify build + run**: `npm run build`, then launch the app (`/run`) and confirm: stops render, checking a load unlocks the matching locked drop, gauge updates.
 
@@ -1161,5 +1193,5 @@ git commit -m "chore: remove dead finance code, drop chart deps"
 ## Self-Review Notes
 
 - **Spec coverage:** data model (Tasks 1–7), design system (8–10), Route (11), Missions (12), Journal/Réglages/Login/Info (13), money removal (3, 5, 13, 14), auto/manual order + lock (6, 11), fonts/palette (8). All spec sections mapped.
-- **Decisions (spec §8):** binary status (Task 1 enum), dark-only (Task 8 strips theme), manual reorder via toggle/order store — **note:** arrow/drag UI for manual reordering is scaffolded (`setManualOrder`) but a drag handle is deferred; auto-order is the default and fully working. If arrow controls are wanted now, add them to `StopCard`/`Home` in Task 11.
+- **Decisions (spec §8):** binary status (Task 1 enum), dark-only (Task 8 strips theme), manual reorder via **up/down arrows** on each stop (Task 11 — `StopCard` arrows + `Home.move()` + `useRouteStore.setManualOrder`); auto-order is the default, arrows switch to manual, `AUTO ON` re-applies auto sort. Drag & drop deferred as a later enhancement.
 - **Station codes** are generated first-3-letters (Task 6), not the illustrative `EVR/TRS` from mockups.
