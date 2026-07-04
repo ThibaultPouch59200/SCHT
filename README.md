@@ -1,18 +1,32 @@
-# SC Hauling Tracker
+# HAUL//OPS — Cargo Terminal
 
-A dark HUD-themed web app for tracking cargo hauling missions in Star Citizen.
-Manage your active deliveries, log missions, and monitor your earnings — all stored locally in your browser.
+Une web-app **thème sombre « Cargo Terminal »** pour planifier et suivre tes
+tournées de fret multi-mission dans **Star Citizen**. Enchaîne les contrats,
+gère le flux **récupération → livraison** station par station, et suis ton
+activité sur un dashboard.
 
 ---
 
-## Features
+## Fonctionnalités
 
-- **Home** — Live delivery board grouped by planet and station. Check off individual resources or confirm an entire station at once. Missions auto-complete when all cargo is delivered.
-- **Missions** — Create and manage hauling missions with dynamic cargo lines. Autocomplete dropdowns for origins, destinations, and resources with on-the-fly creation.
-- **Finance** — Track your wallet, view 30-day earnings chart, and browse full transaction history with per-mission earnings automatically logged.
-- **Settings** — Manage your location and resource lists. One-click import of all 35 Stanton system locations (planets, moons, L-point stations).
+- **Dashboard** — tuiles clés (missions en cours / terminées, SCU livré,
+  cargaisons), **grille de contribution** type GitHub (contrats terminés par
+  jour sur 13 semaines), aperçu des missions en cours avec progression, et top
+  stations / matières par SCU livré.
+- **Route** — la vue opérationnelle. Toutes les cargaisons en cours, regroupées
+  par **station** en une tournée ordonnée. Chaque arrêt indique ce qu'on y
+  **▲ charge** et ce qu'on y **▼ dépose**. Une livraison reste **verrouillée**
+  tant que sa cargaison n'a pas été récupérée. Ordre **auto** (par système →
+  planète → station) ou **manuel** (réordonnancement à la flèche). Jauge de
+  capacité de soute selon le vaisseau sélectionné.
+- **Missions** — formulaire simplifié : une ligne = une cargaison
+  (`matière · SCU · ▲ récup · ▼ livraison`). Les missions terminées restent
+  visibles, **grisées / barrées**, sous les missions actives.
+- **Réglages** — gestion des lieux (station · planète · système), des matières,
+  choix du vaisseau, et import en un clic des lieux du système Stanton.
 
-All data is persisted in `localStorage` — no backend required.
+Chaque cargaison suit le cycle **`PENDING → LOADED → DELIVERED`** ; une mission
+est marquée terminée automatiquement quand toutes ses cargaisons sont livrées.
 
 ---
 
@@ -20,98 +34,100 @@ All data is persisted in `localStorage` — no backend required.
 
 | | |
 |---|---|
-| Framework | React 19 + Vite |
-| Language | TypeScript |
-| State | Zustand (with localStorage persistence) |
-| Styling | Custom CSS (HUD dark theme) + Tailwind CSS |
-| Charts | Chart.js + react-chartjs-2 |
-| Routing | React Router v7 |
-| Icons | Lucide React |
+| Frontend | React 19 · Vite · TypeScript · Zustand · React Router 7 · Lucide |
+| Tests | Vitest (logique de route + agrégats du dashboard) |
+| Polices | Oswald · JetBrains Mono · Barlow (bundle local via `@fontsource`) |
+| Backend | Express · TypeScript · JWT |
+| Base de données | PostgreSQL via Prisma |
+| Déploiement | Docker Compose (nginx + node + postgres) |
+
+Modèle de données clé : chaque `CargoLine` porte son **point de récupération**
+(`origin`), son **point de livraison** (`dest`) et un **`status`** ; une
+`Mission` est un simple regroupement de cargaisons.
 
 ---
 
-## Getting Started
+## Démarrage
 
-### Local development
+### Docker (recommandé)
 
 ```bash
+docker compose up -d --build
+# Frontend → http://localhost:3005
+# API      → http://localhost:4000
+```
+
+Le conteneur backend applique les migrations Prisma et charge les données de
+référence (vaisseaux, lieux, matières) au démarrage.
+
+### Développement local
+
+Base de données (Postgres exposé en local) :
+
+```bash
+docker run -d --name scht-db-dev \
+  -e POSTGRES_DB=scht -e POSTGRES_USER=scht -e POSTGRES_PASSWORD=scht_password \
+  -p 5432:5432 postgres:16-alpine
+```
+
+Backend :
+
+```bash
+cd backend
+cp .env.example .env   # ou crée un .env avec DATABASE_URL / JWT_SECRET / PORT
 npm install
-npm run dev
-# → http://localhost:5173
+npx prisma migrate dev
+npx tsx prisma/seed.ts
+npm run dev            # → http://localhost:4000
 ```
 
-### Production build
+Frontend :
 
 ```bash
-npm run build
-npm run preview
+cd frontend
+npm install
+npm run dev            # → http://localhost:5173
+npm test               # lance les tests Vitest
 ```
-
-### Docker
-
-```bash
-docker compose up -d
-# → http://localhost:80
-```
-
-The Docker setup uses a multi-stage build:
-1. **deps** — installs Node dependencies
-2. **builder** — compiles the Vite/TypeScript app
-3. **runner** — serves the static `dist/` via nginx with gzip and SPA routing
 
 ---
 
-## Project Structure
+## Structure du projet
 
 ```
-src/
-├── App.tsx                     # Router + layout
-├── index.css                   # Global CSS variables + HUD theme
-│
-├── data/
-│   └── stantonLocations.ts     # 35 pre-defined Stanton system locations
-│
-├── store/
-│   ├── useMissionStore.ts      # Missions, delivery tracking, completion logic
-│   ├── useFinanceStore.ts      # Wallet, transactions
-│   └── useListsStore.ts        # Locations (origin & destination) + resources
-│
-├── types/
-│   └── index.ts                # Mission, CargoLine, Transaction
-│
-├── utils/
-│   └── parseAmount.ts          # SC amount parsing (90k, 1.5M) + formatting
-│
+backend/
+├── prisma/
+│   ├── schema.prisma        # User, Ship, Location, Resource, Mission, CargoLine (+ enum CargoStatus)
+│   └── seed.ts              # vaisseaux, lieux Stanton, matières
+└── src/
+    ├── server.ts
+    ├── middleware/auth.ts
+    └── routes/              # auth, locations, resources, missions
+
+frontend/src/
+├── App.tsx                  # routes (accueil → Dashboard)
+├── lib/
+│   ├── api.ts               # client API
+│   ├── route.ts             # buildRoute + logique de verrouillage (testé)
+│   └── stats.ts             # agrégats du dashboard (testé)
+├── store/                   # Zustand : missions, listes, vaisseau, route, auth
+├── styles/cargo-terminal.css
 ├── components/
-│   ├── layout/
-│   │   ├── Sidebar.tsx
-│   │   └── Topbar.tsx
-│   ├── ui/
-│   │   ├── ClipCard.tsx        # Angled clip-path card component
-│   │   ├── ComboSelect.tsx     # Autocomplete dropdown with inline creation
-│   │   ├── Modal.tsx
-│   │   └── StatusBadge.tsx
-│   └── home/
-│       ├── PlanetGroup.tsx
-│       ├── StationBlock.tsx
-│       └── ResourceRow.tsx
-│
-└── pages/
-    ├── Home.tsx
-    ├── Missions.tsx
-    ├── Finance.tsx
-    └── Settings.tsx
+│   ├── layout/NavBar.tsx
+│   ├── route/               # StopCard, Clamp, CapacityGauge
+│   └── dashboard/           # KpiTiles, ContributionGrid, InProgressList, TopBreakdown
+└── pages/                   # Dashboard, Home (Route), Missions, Settings, Info, Login
 ```
 
 ---
 
-## Stanton Locations
+## Système Stanton
 
-The settings page includes a one-click import of all known Stanton system trading locations:
+Import en un clic depuis les Réglages des lieux d'échange connus de Stanton :
 
-| Planet | Key locations |
+| Planète | Lieux clés |
 |---|---|
-| Hurston | Lorville, Everus Harbor, HUR-L2/L3/L4/L5, Arial, Aberdeen, Magda, Ita |
+| Hurston | Lorville, Everus Harbor, HUR-L1/L2/L3/L4/L5, Arial, Aberdeen, Magda, Ita |
 | Crusader | Orison, CRU-L1/L4/L5, GrimHex, Yela, Cellin, Daymar |
-| ArcCorp | Area18, Baijini Point, ARC-L2/L4/L5, Lyria, Wala |
-| MicroTech | New Babbage, Port Tressler, MIC-L2/L3/L4/L5, Calliope, Clio, Euterpe |
+| ArcCorp | Area18, Baijini Point, ARC-L1/L2/L4/L5, Lyria, Wala |
+| microTech | New Babbage, Port Tressler, MIC-L1/L2/L3/L4/L5, Calliope, Clio, Euterpe |
