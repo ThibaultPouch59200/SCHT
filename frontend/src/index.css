@@ -188,15 +188,15 @@ body{font-size:14px;height:100vh;display:flex;overflow:hidden;}
 
 /* ── COMBOSELECT ── */
 .combo-wrap{position:relative;}
-.combo-input{padding:8px 12px;font-size:13px;font-family:var(--font);background:var(--bg-page);border:1px solid var(--border);border-radius:8px;color:var(--text-hi);outline:none;transition:border-color 0.15s;font-weight:500;}
-.combo-input:focus{border-color:var(--border-accent);}
-.combo-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--bg-surface);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;z-index:200;max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(139,74,58,0.1);}
+.combo-input{padding:8px 12px;font-size:13px;font-family:var(--font);background:var(--panel);border:1px solid var(--edge);border-radius:8px;color:var(--txt);outline:none;transition:border-color 0.15s;font-weight:500;}
+.combo-input:focus{border-color:var(--amber);}
+.combo-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--panel);border:1px solid var(--edge);border-top:none;border-radius:0 0 8px 8px;z-index:200;max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(139,74,58,0.1);}
 .combo-dropdown::-webkit-scrollbar{width:3px;}
-.combo-dropdown::-webkit-scrollbar-thumb{background:var(--border);}
-.combo-option{padding:8px 12px;font-size:13px;font-family:var(--font);color:var(--text-mid);cursor:pointer;display:flex;align-items:center;transition:background 0.1s;font-weight:500;}
-.combo-option:hover{background:var(--bg-hover);color:var(--text-hi);}
-.combo-create{color:var(--accent-dark);border-top:1px solid var(--border);}
-.combo-create:hover{background:var(--accent-dim);}
+.combo-dropdown::-webkit-scrollbar-thumb{background:var(--edge);}
+.combo-option{padding:8px 12px;font-size:13px;font-family:var(--font);color:var(--dim);cursor:pointer;display:flex;align-items:center;transition:background 0.1s;font-weight:500;}
+.combo-option:hover{background:var(--panel-2);color:var(--txt);}
+.combo-create{color:var(--amber);border-top:1px solid var(--edge);}
+.combo-create:hover{background:var(--panel-2);}
 
 /* ── SETTINGS ── */
 .settings-section{margin-bottom:32px;}
