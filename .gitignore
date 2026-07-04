@@ -27,3 +27,6 @@ dist-ssr
 .env
 backend/.env
 frontend/.env
+
+# Superpowers brainstorm mockups
+.superpowers/
