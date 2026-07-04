@@ -272,3 +272,5 @@ html,body,#root { background:var(--ink); color:var(--txt); font-family:var(--fon
 .ct-top-row .val{color:var(--amber);}
 .ct-dash-empty{font-family:var(--font-mono);font-size:11px;color:var(--faint);padding:4px 0;}
 @media (max-width:640px){.ct-kpis{grid-template-columns:repeat(2,1fr);}.ct-dash-two{grid-template-columns:1fr;}}
+.ct-mission-card.done{opacity:.5;}
+.ct-mission-card.done .ct-mission-id{text-decoration:line-through;}
