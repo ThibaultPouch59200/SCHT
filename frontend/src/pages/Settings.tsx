@@ -5,7 +5,7 @@ import { useShipStore } from '../store/useShipStore';
 import { STANTON_LOCATIONS } from '../data/stantonLocations';
 import type { Ship } from '../types';
 
-const STORE_KEYS = ['scht-missions', 'scht-finance', 'scht-lists'] as const;
+const STORE_KEYS = ['scht-missions', 'scht-lists'] as const;
 
 function exportData() {
   const snapshot: Record<string, unknown> = { _version: 1, _exportedAt: new Date().toISOString() };
@@ -151,15 +151,15 @@ export const Settings: React.FC = () => {
   const systemKeys = Object.keys(grouped).sort();
 
   return (
-    <div className="page-anim" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-      <div className="content">
+    <div className="ct-page">
+      <div className="ct-content">
 
         {/* MON VAISSEAU */}
-        <div className="settings-section">
-          <div className="settings-section-title">Mon vaisseau</div>
-          <div className="ship-select-row">
+        <div className="ct-settings-section">
+          <div className="ct-h">Mon vaisseau</div>
+          <div className="ct-ship-row" style={{ marginTop: 12 }}>
             <select
-              className="ship-select"
+              className="ct-select ct-ship-select"
               value={selectedShip ? String(selectedShip.id) : ''}
               onChange={handleShipChange}
             >
@@ -179,21 +179,21 @@ export const Settings: React.FC = () => {
               })}
             </select>
             {selectedShip && (
-              <div className="ship-selected-info">
-                <span className="ship-selected-name">{selectedShip.name}</span>
-                <span className="ship-selected-meta">{selectedShip.manufacturer} · {selectedShip.scu} SCU · {selectedShip.category}</span>
+              <div className="ct-ship-info">
+                <span className="name">{selectedShip.name}</span>
+                <span className="meta">{selectedShip.manufacturer} · {selectedShip.scu} SCU · {selectedShip.category}</span>
               </div>
             )}
           </div>
         </div>
 
         {/* LIEUX (origines + destinations fusionnés) */}
-        <div className="settings-section">
-          <div className="settings-section-title">Lieux (récupération &amp; destinations)</div>
+        <div className="ct-settings-section">
+          <div className="ct-h">Lieux (récupération &amp; destinations)</div>
 
           {!alreadyImported && (
-            <div style={{ marginBottom: 14 }}>
-              <button className="import-stanton-btn" onClick={importStanton}>
+            <div style={{ margin: '12px 0 14px' }}>
+              <button className="ct-import-btn" onClick={importStanton}>
                 <Download size={12} style={{ marginRight: 6 }} />
                 Importer Stanton ({STANTON_LOCATIONS.length} lieux)
               </button>
@@ -201,7 +201,7 @@ export const Settings: React.FC = () => {
           )}
 
           {locations.length === 0 && (
-            <div className="empty-state" style={{ marginBottom: 12 }}>
+            <div className="ct-empty" style={{ marginBottom: 12 }}>
               Aucun lieu enregistré.
             </div>
           )}
@@ -210,17 +210,17 @@ export const Settings: React.FC = () => {
             const sysCollapsed = collapsedSystems[sys];
             const planetKeys = Object.keys(grouped[sys]).sort();
             return (
-              <div key={sys} className="settings-tree-system">
+              <div key={sys} className="ct-tree-sys">
                 <div
-                  className="settings-tree-system-header"
+                  className="ct-tree-sys-head"
                   onClick={() => toggleSystem(sys)}
                 >
                   <ChevronRight
                     size={12}
-                    className={`tree-chevron${sysCollapsed ? '' : ' open'}`}
+                    className={`ct-tree-chevron${sysCollapsed ? '' : ' open'}`}
                   />
-                  <span className="settings-tree-sys-label">{sys.toUpperCase()}</span>
-                  <span className="settings-tree-count">
+                  <span className="ct-tree-sys-label">{sys.toUpperCase()}</span>
+                  <span className="ct-tree-count">
                     {Object.values(grouped[sys]).flat().length} lieux
                   </span>
                 </div>
@@ -230,24 +230,24 @@ export const Settings: React.FC = () => {
                   const planetCollapsed = collapsedPlanets[planetKey];
                   const locs = grouped[sys][planet];
                   return (
-                    <div key={planet} className="settings-tree-planet">
+                    <div key={planet} className="ct-tree-planet">
                       <div
-                        className="settings-tree-planet-header"
+                        className="ct-tree-planet-head"
                         onClick={() => togglePlanet(planetKey)}
                       >
                         <ChevronRight
                           size={10}
-                          className={`tree-chevron${planetCollapsed ? '' : ' open'}`}
+                          className={`ct-tree-chevron${planetCollapsed ? '' : ' open'}`}
                         />
-                        <span className="settings-tree-planet-label">{planet}</span>
-                        <span className="settings-tree-count">{locs.length}</span>
+                        <span style={{ flex: 1 }}>{planet}</span>
+                        <span className="ct-tree-count">{locs.length}</span>
                       </div>
 
                       {!planetCollapsed && locs.map((loc) => (
-                        <div key={loc.name} className="settings-tree-item">
-                          <span className="settings-item-name">{loc.name}</span>
+                        <div key={loc.name} className="ct-tree-item">
+                          <span className="name">{loc.name}</span>
                           <button
-                            className="settings-del-btn"
+                            className="ct-del-btn"
                             onClick={() => removeLocation(loc.name, loc.system)}
                             aria-label={`Supprimer ${loc.name}`}
                           >
@@ -263,54 +263,54 @@ export const Settings: React.FC = () => {
           })}
 
           {/* Add form */}
-          <div className="settings-add-loc-form">
-            <div className="settings-add-loc-row">
-              <select
-                value={newLocSystem}
-                onChange={(e) => setNewLocSystem(e.target.value)}
-                className="settings-loc-select"
-              >
-                {SYSTEMS.map((s) => <option key={s}>{s}</option>)}
-              </select>
-              <input
-                type="text"
-                placeholder="Planète (ex: MicroTech)"
-                value={newLocPlanet}
-                onChange={(e) => setNewLocPlanet(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddLocation()}
-                style={{ flex: 1 }}
-              />
-              <input
-                type="text"
-                placeholder="Lieu (ex: New Babbage)"
-                value={newLocName}
-                onChange={(e) => setNewLocName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddLocation()}
-                style={{ flex: 2 }}
-              />
-              <button className="settings-add-btn" onClick={handleAddLocation}>
-                <Plus size={12} style={{ marginRight: 4 }} />
-                Ajouter
-              </button>
-            </div>
+          <div className="ct-add-row">
+            <select
+              value={newLocSystem}
+              onChange={(e) => setNewLocSystem(e.target.value)}
+              className="ct-select"
+            >
+              {SYSTEMS.map((s) => <option key={s}>{s}</option>)}
+            </select>
+            <input
+              type="text"
+              className="ct-input"
+              placeholder="Planète (ex: MicroTech)"
+              value={newLocPlanet}
+              onChange={(e) => setNewLocPlanet(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddLocation()}
+              style={{ flex: 1 }}
+            />
+            <input
+              type="text"
+              className="ct-input"
+              placeholder="Lieu (ex: New Babbage)"
+              value={newLocName}
+              onChange={(e) => setNewLocName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddLocation()}
+              style={{ flex: 2 }}
+            />
+            <button className="ct-btn-add" onClick={handleAddLocation}>
+              <Plus size={12} style={{ marginRight: 4 }} />
+              Ajouter
+            </button>
           </div>
         </div>
 
         {/* RESSOURCES */}
-        <div className="settings-section">
-          <div className="settings-section-title">Ressources / Matières</div>
+        <div className="ct-settings-section">
+          <div className="ct-h">Ressources / Matières</div>
           {resources.length === 0 && (
-            <div className="empty-state" style={{ marginBottom: 12 }}>
+            <div className="ct-empty" style={{ marginTop: 12, marginBottom: 12 }}>
               Aucune ressource enregistrée.
             </div>
           )}
           {resources.length > 0 && (
-            <div className="settings-list settings-list-grid">
+            <div className="ct-grid" style={{ marginTop: 12 }}>
               {[...resources].sort().map((r) => (
-                <div key={r} className="settings-item">
-                  <span className="settings-item-name">{r}</span>
+                <div key={r} className="ct-list-item">
+                  <span className="name">{r}</span>
                   <button
-                    className="settings-del-btn"
+                    className="ct-del-btn"
                     onClick={() => removeResource(r)}
                     aria-label={`Supprimer ${r}`}
                   >
@@ -320,15 +320,17 @@ export const Settings: React.FC = () => {
               ))}
             </div>
           )}
-          <div className="settings-add-row">
+          <div className="ct-add-row">
             <input
               type="text"
+              className="ct-input"
               placeholder="Matière (ex: Titanium)"
               value={newResource}
               onChange={(e) => setNewResource(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddResource()}
+              style={{ flex: 1 }}
             />
-            <button className="settings-add-btn" onClick={handleAddResource}>
+            <button className="ct-btn-add" onClick={handleAddResource}>
               <Plus size={12} style={{ marginRight: 4 }} />
               Ajouter
             </button>
@@ -336,23 +338,23 @@ export const Settings: React.FC = () => {
         </div>
 
         {/* EXPORT / IMPORT */}
-        <div className="settings-section">
-          <div className="settings-section-title">Sauvegarde des données</div>
-          <div className="backup-row">
-            <div className="backup-card">
-              <div className="backup-card-title">Exporter</div>
-              <div className="backup-card-desc">
-                Télécharge un fichier JSON contenant toutes tes missions, transactions et listes.
+        <div className="ct-settings-section">
+          <div className="ct-h">Sauvegarde des données</div>
+          <div className="ct-backup-row" style={{ marginTop: 12 }}>
+            <div className="ct-backup-card">
+              <div className="ct-backup-title">Exporter</div>
+              <div className="ct-backup-desc">
+                Télécharge un fichier JSON contenant toutes tes missions et listes.
               </div>
-              <button className="backup-btn export-btn" onClick={exportData}>
+              <button className="ct-backup-btn export" onClick={exportData}>
                 <FileDown size={13} style={{ marginRight: 7 }} />
                 Exporter les données
               </button>
             </div>
 
-            <div className="backup-card">
-              <div className="backup-card-title">Importer</div>
-              <div className="backup-card-desc">
+            <div className="ct-backup-card">
+              <div className="ct-backup-title">Importer</div>
+              <div className="ct-backup-desc">
                 Restaure un fichier exporté. Les données actuelles seront remplacées.
               </div>
               <input
@@ -363,14 +365,14 @@ export const Settings: React.FC = () => {
                 onChange={handleFileChange}
               />
               <button
-                className="backup-btn import-btn"
+                className="ct-backup-btn"
                 onClick={() => { setImportStatus(null); fileInputRef.current?.click(); }}
               >
                 <Upload size={13} style={{ marginRight: 7 }} />
                 Importer un fichier
               </button>
               {importStatus && (
-                <div className={`backup-status${importStatus.ok ? ' ok' : ' err'}`}>
+                <div className={`ct-backup-status${importStatus.ok ? ' ok' : ' err'}`}>
                   {importStatus.msg}
                 </div>
               )}
