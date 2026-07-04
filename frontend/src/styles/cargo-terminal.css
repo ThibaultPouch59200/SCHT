@@ -25,8 +25,12 @@ html,body,#root { background:var(--ink); color:var(--txt); font-family:var(--fon
 .ct-brand{font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:.16em;text-transform:uppercase;}
 .ct-brand b{color:var(--amber);}
 .ct-nav{display:flex;gap:2px;font-family:var(--font-display);font-size:12px;letter-spacing:.08em;text-transform:uppercase;}
-.ct-nav span{padding:5px 11px;color:var(--dim);}
-.ct-nav span.on{color:var(--ink);background:var(--amber);}
+.ct-nav span,.ct-nav a{padding:5px 11px;color:var(--dim);text-decoration:none;}
+.ct-nav span.on,.ct-nav a.on{color:var(--ink);background:var(--amber);}
+.ct-topbar-actions{display:flex;align-items:center;gap:8px;}
+.ct-icon-btn{display:flex;align-items:center;justify-content:center;width:28px;height:28px;background:transparent;border:1px solid var(--edge);color:var(--dim);text-decoration:none;cursor:pointer;}
+.ct-icon-btn:hover{color:var(--txt);border-color:var(--faint);}
+.ct-icon-btn.on{color:var(--ink);background:var(--amber);border-color:var(--amber);}
 
 /* ── AUTO TOGGLE SWITCH ── */
 .ct-toggle{font-family:var(--font-mono);font-size:10px;color:var(--dim);display:flex;gap:6px;align-items:center;letter-spacing:.05em;}
