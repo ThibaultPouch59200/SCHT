@@ -9,15 +9,13 @@ datasource db {
 }
 
 model User {
-  id             Int           @id @default(autoincrement())
-  username       String        @unique
+  id             Int       @id @default(autoincrement())
+  username       String    @unique
   passwordHash   String
-  wallet         Int           @default(0)
-  createdAt      DateTime      @default(now())
+  createdAt      DateTime  @default(now())
   missions       Mission[]
-  transactions   Transaction[]
   selectedShipId Int?
-  selectedShip   Ship?         @relation(fields: [selectedShipId], references: [id])
+  selectedShip   Ship?     @relation(fields: [selectedShipId], references: [id])
 }
 
 model Ship {
@@ -30,12 +28,12 @@ model Ship {
 }
 
 model Location {
-  id         Int         @id @default(autoincrement())
-  name       String
-  planet     String
-  system     String
-  missions   Mission[]   @relation("MissionOrigin")
-  cargoLines CargoLine[] @relation("CargoLineDest")
+  id           Int         @id @default(autoincrement())
+  name         String
+  planet       String
+  system       String
+  cargoOrigins CargoLine[] @relation("CargoLineOrigin")
+  cargoDests   CargoLine[] @relation("CargoLineDest")
 
   @@unique([name, system])
 }
@@ -49,43 +47,28 @@ model Resource {
 model Mission {
   id          Int         @id @default(autoincrement())
   userId      Int
-  originId    Int
-  system      String
-  pay         Int
   createdAt   DateTime    @default(now())
   completedAt DateTime?
   user        User        @relation(fields: [userId], references: [id])
-  origin      Location    @relation("MissionOrigin", fields: [originId], references: [id])
   cargos      CargoLine[]
 }
 
+enum CargoStatus {
+  PENDING
+  LOADED
+  DELIVERED
+}
+
 model CargoLine {
-  id         Int              @id @default(autoincrement())
+  id         Int         @id @default(autoincrement())
   missionId  Int
   resourceId Int
   scu        Float
+  originId   Int
   destId     Int
-  mission    Mission          @relation(fields: [missionId], references: [id], onDelete: Cascade)
-  resource   Resource         @relation(fields: [resourceId], references: [id])
-  dest       Location         @relation("CargoLineDest", fields: [destId], references: [id])
-  delivered  DeliveredAmount?
-}
-
-model DeliveredAmount {
-  id          Int       @id @default(autoincrement())
-  cargoLineId Int       @unique
-  amount      Float     @default(0)
-  confirmed   Boolean   @default(false)
-  cargoLine   CargoLine @relation(fields: [cargoLineId], references: [id], onDelete: Cascade)
-}
-
-model Transaction {
-  id        Int    @id @default(autoincrement())
-  userId    Int
-  date      String
-  desc      String
-  amount    Int
-  type      String
-  missionId Int?
-  user      User   @relation(fields: [userId], references: [id])
+  status     CargoStatus @default(PENDING)
+  mission    Mission     @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  resource   Resource    @relation(fields: [resourceId], references: [id])
+  origin     Location    @relation("CargoLineOrigin", fields: [originId], references: [id])
+  dest       Location    @relation("CargoLineDest", fields: [destId], references: [id])
 }
