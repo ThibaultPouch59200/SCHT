@@ -42,10 +42,13 @@ html,body,#root { background:var(--ink); color:var(--txt); font-family:var(--fon
 .ct-gauge.boxed{padding:9px 12px;border:1px solid var(--edge);border-bottom:1px solid var(--edge);margin-bottom:16px;}
 .ct-gauge .lbl{font-size:10px;letter-spacing:.12em;color:var(--faint);}
 .ct-gauge .val{font-size:13px;font-weight:700;color:var(--amber);}
+.ct-gauge-lbl{font-size:10px;letter-spacing:.12em;color:var(--faint);}
+.ct-gauge-val{font-size:13px;font-weight:700;color:var(--amber);}
 .ct-gauge.boxed .val{font-size:12px;}
 .ct-cells{display:flex;gap:2px;flex:1;}
 .ct-cell{height:9px;flex:1;background:var(--edge);}
 .ct-cell.f{background:var(--amber);}
+.ct-cell.i{background:rgba(242,168,59,.4);}
 .ct-cell.old{background:rgba(242,168,59,.4);}
 .ct-cell.new{background:var(--amber);}
 
