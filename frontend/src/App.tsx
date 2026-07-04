@@ -23,7 +23,7 @@ function App() {
         <NavBar />
         <div className="main">
           <Routes>
-            <Route path="/" element={<Navigate to="/operations" replace />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/operations" element={<Home />} />
             <Route path="/missions" element={<Missions />} />
             <Route path="/dashboard" element={<Dashboard />} />
