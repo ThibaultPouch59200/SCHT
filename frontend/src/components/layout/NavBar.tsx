@@ -4,9 +4,9 @@ import { Info, LogOut } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 
 const NAV_ITEMS = [
+  { to: '/dashboard', label: 'Dashboard' },
   { to: '/operations', label: 'Route' },
   { to: '/missions', label: 'Missions' },
-  { to: '/dashboard', label: 'Dashboard' },
   { to: '/settings', label: 'Réglages' },
 ];
 
